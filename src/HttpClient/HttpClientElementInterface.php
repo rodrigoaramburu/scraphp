@@ -12,4 +12,5 @@ interface HttpClientElementInterface
     public function text(): string;
     public function attr(string $attr): string;
     public function each(string $selector, Closure $closure): void;
+    public function html(): string;
 }

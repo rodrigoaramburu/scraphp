@@ -79,3 +79,13 @@ test('deve percorrer os elementos filhos ',function(){
 
     expect($expectTexts)->toBe(['Item 1','Item 2','Item 3','Item 4']);
 });
+
+
+test('deve pegar o html dentro de um seletor', function(){
+
+    $httpClient = new HttpClient();
+
+    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    
+    expect(trim($httpClient->css('.html')->html()) )->toBe('<div>tag <strong>negrito</strong> outra</div>');
+});

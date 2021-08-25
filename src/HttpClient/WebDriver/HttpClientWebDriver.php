@@ -58,7 +58,8 @@ class HttpClientWebDriver implements HttpClientInterface
     public function css(string $selector): HttpClientElementInterface
     {
         return new HttpClientWebDriverElement( 
-            remoteWebElement: $this->driver->findElement( WebDriverBy::cssSelector($selector) )
+            remoteWebElement: $this->driver->findElement( WebDriverBy::cssSelector($selector) ),
+            driver: $this->driver
         );
     }
 
@@ -67,7 +68,7 @@ class HttpClientWebDriver implements HttpClientInterface
         $elements = $this->driver->findElements( WebDriverBy::cssSelector($selector) );
 
         foreach ($elements as $key => $element) {
-            $closure(new HttpClientWebDriverElement( remoteWebElement: $element), $key);
+            $closure(new HttpClientWebDriverElement( remoteWebElement: $element, driver: $this->driver), $key);
         }
     }
 }

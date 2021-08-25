@@ -20,5 +20,9 @@
         <li>Item 4</li>
     </ul>
 
+    <div class="html">
+        <div>tag <strong>negrito</strong> outra</div>
+    </div>
+
 </body>
 </html>

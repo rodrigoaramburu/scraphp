@@ -30,4 +30,9 @@ class HttpClientElement implements HttpClientElementInterface
             return $closure( new HttpClientElement( crawler: $crawler) , $i);
         });
     }
+
+    public function html(): string
+    {
+        return $this->crawler->html();
+    }
 }

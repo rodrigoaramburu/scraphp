@@ -6,12 +6,13 @@ namespace ScraPHP\HttpClient\WebDriver;
 
 use Closure;
 use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use ScraPHP\HttpClient\HttpClientElementInterface;
 
 class HttpClientWebDriverElement implements HttpClientElementInterface
 {
-    public function __construct(private RemoteWebElement $remoteWebElement){}
+    public function __construct(private RemoteWebElement $remoteWebElement, private RemoteWebDriver $driver){}
 
     public function text(): string
     {
@@ -28,7 +29,13 @@ class HttpClientWebDriverElement implements HttpClientElementInterface
         $elements = $this->remoteWebElement->findElements(WebDriverBy::cssSelector($selector));
 
         foreach($elements as $key => $element){
-            $closure( new HttpClientWebDriverElement( remoteWebElement: $element), $key);
+            $closure( new HttpClientWebDriverElement( remoteWebElement: $element, driver: $this->driver), $key);
         }
     }
+
+    public function html(): string
+    {
+        $innerHtml = $this->driver->executeScript('return arguments[0].innerHTML', [$this->remoteWebElement]);
+        return $innerHtml; 
+    } 
 }
