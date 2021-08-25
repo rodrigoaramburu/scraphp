@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ScraPHP\HttpClient;
 
+use Closure;
+
 
 interface HttpClientElementInterface
 {
