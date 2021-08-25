@@ -1,1 +1,4 @@
 vendor
+coverage
+.vscode
+.phpunit.result.cache

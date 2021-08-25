@@ -14,5 +14,13 @@
     },
     "require-dev": {
         "pestphp/pest": "^1.16"
+    },
+    "require": {
+        "symfony/process": "^5.3",
+        "php-webdriver/webdriver": "^1.11"
+    },
+    "scripts":{
+        "test": "./vendor/bin/pest",
+        "coverage-report": "./vendor/bin/pest --coverage-html coverage"
     }
 }
