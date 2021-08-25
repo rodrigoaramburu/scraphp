@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use ScraPHP\HttpClient\WebDriverProcess;
+use ScraPHP\HttpClient\WebDriver\WebDriverProcess;
 
 test('deve iniciar o processo do webdriver', function(){
 

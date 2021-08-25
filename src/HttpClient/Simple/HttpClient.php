@@ -2,16 +2,19 @@
 
 declare(strict_types=1);
 
-namespace ScraPHP\HttpClient;
+namespace ScraPHP\HttpClient\Simple;
 
 use Closure;
+
 use ScraPHP\Request;
 use ScraPHP\Response;
-use ScraPHP\HttpClient\HttpClientElement;
-use Symfony\Component\DomCrawler\Crawler;
+use ScraPHP\HttpClient\Simple\HttpClientElement;
+use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\HttpClient\HttpClientElementInterface;
+
 use Symfony\Component\HttpClient\HttpClient as SymfonyHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface as SymfonyHttpClientInterface;
+use Symfony\Component\DomCrawler\Crawler;
 
 class HttpClient implements HttpClientInterface
 {

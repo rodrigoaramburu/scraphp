@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace ScraPHP\HttpClient;
+namespace ScraPHP\HttpClient\WebDriver;
 
 use Closure;
 use ScraPHP\Request;
 use ScraPHP\Response;
 use Facebook\WebDriver\WebDriverBy;
 use Symfony\Component\Process\Process;
+use ScraPHP\HttpClient\HttpClientInterface;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use ScraPHP\HttpClient\HttpClientElementInterface;
-use ScraPHP\HttpClient\HttpClientWebDriverElement;
+use ScraPHP\HttpClient\WebDriver\HttpClientWebDriverElement;
 
 
 class HttpClientWebDriver implements HttpClientInterface

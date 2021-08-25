@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use ScraPHP\Request;
 use ScraPHP\Response;
-use ScraPHP\HttpClient\HttpClient;
+use ScraPHP\HttpClient\Simple\HttpClient;
 use Symfony\Component\Process\Process;
 use ScraPHP\HttpClient\HttpClientElementInterface;
 

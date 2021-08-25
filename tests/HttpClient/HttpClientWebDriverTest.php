@@ -5,8 +5,8 @@ declare(strict_types=1);
 use ScraPHP\Request;
 use ScraPHP\Response;
 use Symfony\Component\Process\Process;
-use ScraPHP\HttpClient\WebDriverProcess;
-use ScraPHP\HttpClient\HttpClientWebDriver;
+use ScraPHP\HttpClient\WebDriver\WebDriverProcess;
+use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
 use ScraPHP\HttpClient\HttpClientElementInterface;
 
 $httpServerProcess = null;

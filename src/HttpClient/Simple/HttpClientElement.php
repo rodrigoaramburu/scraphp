@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ScraPHP\HttpClient;
+namespace ScraPHP\HttpClient\Simple;
 
 use Closure;
 use Symfony\Component\DomCrawler\Crawler;
