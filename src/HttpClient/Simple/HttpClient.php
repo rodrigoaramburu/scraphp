@@ -6,15 +6,17 @@ namespace ScraPHP\HttpClient\Simple;
 
 use Closure;
 
+use Exception;
 use ScraPHP\Request;
 use ScraPHP\Response;
-use ScraPHP\HttpClient\Simple\HttpClientElement;
-use ScraPHP\HttpClient\HttpClientInterface;
-use ScraPHP\HttpClient\HttpClientElementInterface;
+use Symfony\Component\DomCrawler\Crawler;
+use ScraPHP\HttpClient\HttpClientException;
 
+use ScraPHP\HttpClient\HttpClientInterface;
+use ScraPHP\HttpClient\Simple\HttpClientElement;
+use ScraPHP\HttpClient\HttpClientElementInterface;
 use Symfony\Component\HttpClient\HttpClient as SymfonyHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface as SymfonyHttpClientInterface;
-use Symfony\Component\DomCrawler\Crawler;
 
 class HttpClient implements HttpClientInterface
 {
@@ -29,9 +31,13 @@ class HttpClient implements HttpClientInterface
     public function access(Request $request): Response
     {
         $this->bodyHtml = '';
-        $result = $this->client->request('GET', $request->url());
-        
-        $this->bodyHtml = $result->getContent(); 
+
+        try{
+            $result = $this->client->request('GET', $request->url());
+            $this->bodyHtml = $result->getContent(); 
+        }catch(Exception $e){
+            throw new HttpClientException('Erro ao acessar a página: ' . $e->getMessage());
+        }
         
         return new Response(
             url: $request->url(),

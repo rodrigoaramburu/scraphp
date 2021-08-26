@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 use ScraPHP\Request;
 use ScraPHP\Response;
-use ScraPHP\HttpClient\Simple\HttpClient;
 use Symfony\Component\Process\Process;
+use ScraPHP\HttpClient\Simple\HttpClient;
+use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientElementInterface;
 
 $httpServerProcess = null;
@@ -89,3 +90,12 @@ test('deve pegar o html dentro de um seletor', function(){
     
     expect(trim($httpClient->css('.html')->html()) )->toBe('<div>tag <strong>negrito</strong> outra</div>');
 });
+
+
+
+test('deve lancar exceção se não foi possível acessar a página',function(){
+    $httpClient = new HttpClient();
+
+    $httpClient->access( new Request(url: 'http://localhost:54321/page1.php'));
+    
+})->throws(HttpClientException::class, 'Erro ao acessar a página: ');

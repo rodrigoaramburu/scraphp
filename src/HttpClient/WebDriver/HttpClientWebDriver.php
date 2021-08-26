@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace ScraPHP\HttpClient\WebDriver;
 
 use Closure;
+use Exception;
 use ScraPHP\Request;
 use ScraPHP\Response;
 use Facebook\WebDriver\WebDriverBy;
 use Symfony\Component\Process\Process;
+use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
@@ -41,7 +43,11 @@ class HttpClientWebDriver implements HttpClientInterface
     
     public function access(Request $request): Response
     {
-        $this->driver->get($request->url());
+        try{
+            $this->driver->get($request->url());
+        }catch(Exception $e){
+            throw new HttpClientException('Erro ao acessar a página: ' . $e->getMessage());
+        }
 
 
         return new Response(
