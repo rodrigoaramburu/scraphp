@@ -44,7 +44,12 @@ class HttpClientWebDriver implements HttpClientInterface
     public function access(Request $request): Response
     {
         try{
-            $this->driver->get($request->url());
+            if($request->method() == "GET"){
+                $this->get($request);
+            }
+            if($request->method() == "POST"){
+                $this->post($request);
+            }
         }catch(Exception $e){
             throw new HttpClientException('Erro ao acessar a página: ' . $e->getMessage());
         }
@@ -54,6 +59,40 @@ class HttpClientWebDriver implements HttpClientInterface
             url: $request->url(),
             httpClient: $this
         );
+    }
+
+    private function get(Request $request): void
+    {
+        $this->driver->get($request->url());
+    } 
+
+    private function post(Request $request): void
+    {
+        $this->driver->get('data:,');
+
+        $inputs = "";
+        foreach ($request->data() as $key => $value) {
+            $inputs .=  <<<"JS"
+            const hiddenField_{$key} = document.createElement('input');
+            hiddenField_{$key}.type = 'hidden';
+            hiddenField_{$key}.name = '{$key}';
+            hiddenField_{$key}.value = '{$value}';
+
+            form.appendChild(hiddenField_{$key});
+        JS;
+        }
+
+        $script = <<<"JS"
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{$request->url()}';
+            document.body.appendChild(form);
+
+            {$inputs}
+
+            form.submit();
+            JS;
+        $this->driver->executeScript( $script );
     }
 
     public function bodyHtml(): string

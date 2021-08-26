@@ -99,3 +99,28 @@ test('deve lancar exceção se não foi possível acessar a página',function(){
     $httpClient->access( new Request(url: 'http://localhost:54321/page1.php'));
     
 })->throws(HttpClientException::class, 'Erro ao acessar a página: ');
+
+
+test('deve realizar uma requisição post', function(){
+
+    $httpClient = new HttpClient();
+
+    $request = new Request(
+        url: 'http://localhost:9666/post.php',
+        method: Request::POST,
+        data: [
+            'nome' => 'Joao',
+            'sobrenome' => 'Silva',
+            'email' => 'joaosilva@gmail.com',
+            'senha' => '123456'
+        ]
+    );
+
+    $httpClient->access( $request );
+
+    expect($httpClient->bodyHtml())
+        ->toContain('<div>Nome: Joao</div>')
+        ->toContain('<div>Sobrenome: Silva</div>')
+        ->toContain('<div>E-mail: joaosilva@gmail.com</div>')
+        ->toContain('<div>Senha: 123456</div>');
+});

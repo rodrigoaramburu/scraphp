@@ -33,8 +33,12 @@ class HttpClient implements HttpClientInterface
         $this->bodyHtml = '';
 
         try{
-            $result = $this->client->request('GET', $request->url());
-            $this->bodyHtml = $result->getContent(); 
+            if($request->method() == 'GET'){
+                $this->get($request);
+            }
+            if($request->method() == 'POST'){
+                $this->post($request);
+            }
         }catch(Exception $e){
             throw new HttpClientException('Erro ao acessar a página: ' . $e->getMessage());
         }
@@ -43,6 +47,20 @@ class HttpClient implements HttpClientInterface
             url: $request->url(),
             httpClient: $this
         );
+    }
+    
+    private function get(Request $request): void 
+    {
+        $result = $this->client->request('GET', $request->url());
+        $this->bodyHtml = $result->getContent(); 
+    }
+
+    private function post(Request $request): void 
+    {
+        $result = $this->client->request('POST', $request->url(),[
+            'body' => $request->data()
+        ]);
+        $this->bodyHtml = $result->getContent(); 
     }
 
     public function bodyHtml(): string
