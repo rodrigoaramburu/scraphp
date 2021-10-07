@@ -128,3 +128,37 @@ test('deve realizar uma requisição post', function(){
         ->toContain('<div>E-mail: joaosilva@gmail.com</div>')
         ->toContain('<div>Senha: 123456</div>');
 });
+
+
+
+test('deve pegar o n elemento de um seletor', function(){
+
+    $httpClient = new HttpClientWebDriver();
+
+    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    
+    expect($httpClient->css('.lista li:nth-child(3)')->text() )->toBe('Item 3');
+});
+
+
+test('deve pegar permiter encadear filtro css', function(){
+
+    $httpClient = new HttpClientWebDriver();
+
+    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    
+    expect($httpClient->css('.lista')->css('li:nth-child(3)')->text() )->toBe('Item 3');
+});
+
+
+
+test('deve retornar null se o elemento não exitir', function(){
+
+    $httpClient = new HttpClientWebDriver();
+
+    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    
+    expect($httpClient->css('.nao-existe'))->toBeNull();
+
+    expect($httpClient->css('.lista')->css('img'))->toBeNull();
+});

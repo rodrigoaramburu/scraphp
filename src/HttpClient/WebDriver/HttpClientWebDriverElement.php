@@ -9,6 +9,7 @@ use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use ScraPHP\HttpClient\HttpClientElementInterface;
+use Facebook\WebDriver\Exception\NoSuchElementException;
 
 class HttpClientWebDriverElement implements HttpClientElementInterface
 {
@@ -41,9 +42,14 @@ class HttpClientWebDriverElement implements HttpClientElementInterface
 
     public function css(string $selector): ?HttpClientElementInterface
     {
-        return new HttpClientWebDriverElement( 
-            remoteWebElement: $this->driver->findElement( WebDriverBy::cssSelector($selector) ),
-            driver: $this->driver
-        );
+        try{
+            $remoteWebElement = $this->driver->findElement( WebDriverBy::cssSelector($selector) );
+            return new HttpClientWebDriverElement( 
+                remoteWebElement: $remoteWebElement,
+                driver: $this->driver
+            );
+        }catch(NoSuchElementException $e){
+            return null;
+        }
     }
 }

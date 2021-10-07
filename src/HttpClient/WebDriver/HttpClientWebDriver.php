@@ -16,6 +16,7 @@ use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use ScraPHP\HttpClient\HttpClientElementInterface;
+use Facebook\WebDriver\Exception\NoSuchElementException;
 use ScraPHP\HttpClient\WebDriver\HttpClientWebDriverElement;
 
 
@@ -102,10 +103,15 @@ class HttpClientWebDriver implements HttpClientInterface
 
     public function css(string $selector): ?HttpClientElementInterface
     {
-        return new HttpClientWebDriverElement( 
-            remoteWebElement: $this->driver->findElement( WebDriverBy::cssSelector($selector) ),
-            driver: $this->driver
-        );
+        try{
+            $remoteWebElement = $this->driver->findElement( WebDriverBy::cssSelector($selector) );
+            return new HttpClientWebDriverElement( 
+                remoteWebElement: $remoteWebElement,
+                driver: $this->driver
+            );
+        }catch(NoSuchElementException $e){
+            return null;
+        }
     }
 
     public function cssEach(string $selector, Closure $closure): void
