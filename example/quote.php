@@ -16,7 +16,7 @@ class QuoteScrap extends Scrap
     public function parse(Response $response): Generator
     {
         $data = [];
-        $response->cssEach('.quote', function(HttpClientElementInterface $element) use(&$data){
+        $response->cssEach('.quote', function(HttpClientElementInterface $element, $i) use(&$data){
             
             $data[] = [
                 'text' => $element->css('.text')->text(),
@@ -32,6 +32,7 @@ class QuoteScrap extends Scrap
 }
 
 $engine = new Engine();
+$engine->useWebDriver();
 
 $scrap = new QuoteScrap();
 $scrap->addWriter( new LogWriter());
