@@ -43,7 +43,7 @@ class HttpClientWebDriverElement implements HttpClientElementInterface
     public function css(string $selector): ?HttpClientElementInterface
     {
         try{
-            $remoteWebElement = $this->driver->findElement( WebDriverBy::cssSelector($selector) );
+            $remoteWebElement = $this->remoteWebElement->findElement( WebDriverBy::cssSelector($selector) );
             return new HttpClientWebDriverElement( 
                 remoteWebElement: $remoteWebElement,
                 driver: $this->driver
