@@ -16,6 +16,11 @@ class WebDriverProcess
         $this->process = new Process([self::$chromeDriverPath, '--port=4444']);
     }
 
+    public function __destruct()
+    {
+        $this->process->stop();
+    }
+
     public function run(): void
     {
         $this->process->start();
