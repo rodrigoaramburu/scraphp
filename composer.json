@@ -13,7 +13,8 @@
         }
     },
     "require-dev": {
-        "pestphp/pest": "^1.16"
+        "pestphp/pest": "^1.16",
+        "mockery/mockery": "^1.4"
     },
     "require": {
         "symfony/process": "^5.3",

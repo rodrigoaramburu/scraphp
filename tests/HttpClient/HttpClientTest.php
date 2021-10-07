@@ -14,6 +14,7 @@ $httpServerProcess = null;
 beforeAll( function() use(&$httpServerProcess){
     $httpServerProcess = new Process(['php', '-S' ,'localhost:9666', '-t', 'tests/pages/']);
     $httpServerProcess->start();
+    sleep(5);
 });
 
 afterAll(function() use(&$httpServerProcess) {

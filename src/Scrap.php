@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace ScraPHP;
 
 use Generator;
+use ScraPHP\Writers\WriterInterface;
 
 abstract class Scrap
 {
     private array $requests = [];
-
+    private array $writers = [];
     abstract public function parse(Response $response): Generator;
 
     public function addRequest(Request $request): void
@@ -20,5 +21,15 @@ abstract class Scrap
     public function nextRequest(): ?Request
     {
         return array_shift($this->requests);
+    }
+
+    public function addWriter(WriterInterface $writer): void
+    {
+        $this->writers[] = $writer;
+    }
+
+    public function writers(): array
+    {
+        return $this->writers;
     }
 }

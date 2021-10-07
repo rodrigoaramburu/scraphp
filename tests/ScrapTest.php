@@ -5,6 +5,7 @@ declare(strict_types=1);
 use ScraPHP\Scrap;
 use ScraPHP\Request;
 use ScraPHP\Response;
+use ScraPHP\Writers\WriterInterface;
 
 test('Deve permitir adicionar uma request e recupearar', function(){
 
@@ -28,4 +29,25 @@ test('Deve permitir adicionar uma request e recupearar', function(){
     expect($scrap->nextRequest() )->toBe($request3);
 
     expect($scrap->nextRequest() )->toBe(null);
+});
+
+
+test('Deve permitir adicionar um writer e recupearar', function(){
+
+    $writer1 = $this->createMock(WriterInterface::class);
+    $writer2 = $this->createMock(WriterInterface::class);
+    $scrap = new class extends Scrap{
+        public function parse(Response $response): Generator
+        {
+            yield []; 
+        }
+    };
+
+    $scrap->addWriter($writer1);
+    $scrap->addWriter($writer2);
+
+    expect( count($scrap->writers() ) )->toBe(2);
+    expect($scrap->writers()[0] )->toBe($writer1);
+    expect($scrap->writers()[1] )->toBe($writer2);
+    
 });
