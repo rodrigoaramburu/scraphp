@@ -100,7 +100,7 @@ class HttpClientWebDriver implements HttpClientInterface
         return $this->driver->getPageSource();
     }
 
-    public function css(string $selector): HttpClientElementInterface
+    public function css(string $selector): ?HttpClientElementInterface
     {
         return new HttpClientWebDriverElement( 
             remoteWebElement: $this->driver->findElement( WebDriverBy::cssSelector($selector) ),

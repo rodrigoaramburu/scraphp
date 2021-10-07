@@ -15,7 +15,7 @@ interface HttpClientInterface
 
     public function bodyHtml(): string;
 
-    public function css(string $selector): HttpClientElementInterface;
+    public function css(string $selector): ?HttpClientElementInterface;
 
     public function cssEach(string $selector, Closure $closure): void;
 }

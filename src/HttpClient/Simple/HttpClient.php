@@ -68,10 +68,14 @@ class HttpClient implements HttpClientInterface
         return $this->bodyHtml;
     }
 
-    public function css(string $selector): HttpClientElementInterface
+    public function css(string $selector): ?HttpClientElementInterface
     {
         $crawler = new Crawler($this->bodyHtml);
-        return new HttpClientElement( crawler: $crawler->filter($selector) );
+        $crawler = $crawler->filter($selector);
+        if( $crawler->count() === 0 ){
+            return null;
+        }
+        return new HttpClientElement( crawler: $crawler );
     }
 
     public function cssEach(string $selector, Closure $closure): void

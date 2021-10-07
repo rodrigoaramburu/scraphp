@@ -38,4 +38,12 @@ class HttpClientWebDriverElement implements HttpClientElementInterface
         $innerHtml = $this->driver->executeScript('return arguments[0].innerHTML', [$this->remoteWebElement]);
         return $innerHtml; 
     } 
+
+    public function css(string $selector): ?HttpClientElementInterface
+    {
+        return new HttpClientWebDriverElement( 
+            remoteWebElement: $this->driver->findElement( WebDriverBy::cssSelector($selector) ),
+            driver: $this->driver
+        );
+    }
 }

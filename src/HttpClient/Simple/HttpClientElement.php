@@ -35,4 +35,13 @@ class HttpClientElement implements HttpClientElementInterface
     {
         return $this->crawler->html();
     }
+
+    public function css(string $selector): ?HttpClientElement
+    {
+        $crawler = $this->crawler->filter($selector);
+        if($crawler->count() === 0){
+            return null;
+        }
+        return new HttpClientElement( crawler: $crawler );
+    }
 }

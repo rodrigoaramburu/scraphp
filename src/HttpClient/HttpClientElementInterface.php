@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ScraPHP\HttpClient;
 
 use Closure;
+use ScraPHP\HttpClient\HttpClientElementInterface;
 
 
 interface HttpClientElementInterface
@@ -13,4 +14,5 @@ interface HttpClientElementInterface
     public function attr(string $attr): string;
     public function each(string $selector, Closure $closure): void;
     public function html(): string;
+    public function css(string $selector): ?HttpClientElementInterface;
 }
