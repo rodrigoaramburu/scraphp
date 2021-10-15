@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-include('../vendor/autoload.php');
+include('../../vendor/autoload.php');
 
 use ScraPHP\Scrap;
 use ScraPHP\Engine;

@@ -11,6 +11,7 @@ abstract class Scrap
 {
     private array $requests = [];
     private array $writers = [];
+    private int $retry = 3;
     abstract public function parse(Response $response): Generator;
 
     public function addRequest(Request $request): void
@@ -31,5 +32,18 @@ abstract class Scrap
     public function writers(): array
     {
         return $this->writers;
+    }
+
+    public function retry(): int
+    {
+        return $this->retry;
+    }
+
+    public function failRequest(Request $request): void
+    {
+        $request->failCountIncrement();
+        if( $request->failCount() < $this->retry()){
+            $this->addRequest($request);
+        }
     }
 }

@@ -5,6 +5,9 @@ use ScraPHP\Engine;
 use ScraPHP\Request;
 use ScraPHP\Response;
 use ScraPHP\Writers\WriterInterface;
+use ScraPHP\HttpClient\HttpClientException;
+use ScraPHP\HttpClient\HttpClientInterface;
+use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
 
 function arrayAsGenerator(array $array)
 {
@@ -52,4 +55,34 @@ test('deve processar um scrap', function(){
     $engine->scrap($scrap);
     $engine->start();
 
+});
+
+test('deve permitir usar httpwebdriver', function(){
+    $engine = new Engine();
+    $engine->useWebDriver();
+
+    expect($engine->httpClient())->toBeInstanceOf(HttpClientWebDriver::class);
+});
+
+
+test('deve tentar novamente se request não encontrado', function(){
+    $request = new Request(url: 'http://example.com');
+
+    $scrap = new class extends Scrap{
+        public function parse(Response $response): Generator{
+            yield [];
+        }
+    };
+
+    $scrap->addRequest($request);
+
+    $httpClient = $this->createMock(HttpClientInterface::class);
+    $httpClient->method('access')->with($request)->will($this->throwException(new HttpClientException()));
+    
+    $engine = new Engine();
+    $engine->setHttpClient($httpClient);
+    $engine->scrap($scrap);
+    $engine->start();
+
+    expect($scrap->retry())->toBe(3);
 });
