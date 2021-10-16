@@ -9,9 +9,12 @@ use ScraPHP\Writers\WriterInterface;
 
 abstract class Scrap
 {
+    /* @var $requests Request[] */
     private array $requests = [];
     private array $writers = [];
     private int $retry = 3;
+    private int $delay = 0;
+
     abstract public function parse(Response $response): Generator;
 
     public function addRequest(Request $request): void
@@ -42,8 +45,17 @@ abstract class Scrap
     public function failRequest(Request $request): void
     {
         $request->failCountIncrement();
-        if( $request->failCount() < $this->retry()){
+        if ($request->failCount() < $this->retry()) {
             $this->addRequest($request);
         }
+    }
+
+    public function changeDelay(int $delay): void
+    {
+        $this->delay = $delay;
+    }
+    public function delay(): int
+    {
+        return $this->delay;
     }
 }

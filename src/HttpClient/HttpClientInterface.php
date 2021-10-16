@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
@@ -7,7 +7,6 @@ namespace ScraPHP\HttpClient;
 use Closure;
 use ScraPHP\Request;
 use ScraPHP\Response;
-use ScraPHP\HttpClient\HttpClientElementInterface;
 
 interface HttpClientInterface
 {

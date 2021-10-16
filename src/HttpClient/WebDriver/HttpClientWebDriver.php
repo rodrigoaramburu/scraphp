@@ -6,25 +6,23 @@ namespace ScraPHP\HttpClient\WebDriver;
 
 use Closure;
 use Exception;
-use ScraPHP\Request;
-use ScraPHP\Response;
+use Facebook\WebDriver\Chrome\ChromeOptions;
+use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
-use Symfony\Component\Process\Process;
+use ScraPHP\HttpClient\HttpClientElementInterface;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
-use Facebook\WebDriver\Chrome\ChromeOptions;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
-use ScraPHP\HttpClient\HttpClientElementInterface;
-use Facebook\WebDriver\Exception\NoSuchElementException;
-use ScraPHP\HttpClient\WebDriver\HttpClientWebDriverElement;
+use ScraPHP\Request;
+use ScraPHP\Response;
+use Symfony\Component\Process\Process;
 
-
-class HttpClientWebDriver implements HttpClientInterface
+final class HttpClientWebDriver implements HttpClientInterface
 {
     private Process $process;
     private RemoteWebDriver $driver;
-    
+
     public function __construct()
     {
         $chromeOptions = new ChromeOptions();
@@ -34,66 +32,30 @@ class HttpClientWebDriver implements HttpClientInterface
         $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
         $this->driver = RemoteWebDriver::create('http://localhost:4444', $desiredCapabilities);
-
     }
 
     public function __destruct()
     {
         $this->driver->quit();
     }
-    
+
     public function access(Request $request): Response
     {
-        try{
-            if($request->method() == "GET"){
+        try {
+            if ($request->method() === 'GET') {
                 $this->get($request);
             }
-            if($request->method() == "POST"){
+            if ($request->method() === 'POST') {
                 $this->post($request);
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             throw new HttpClientException('Erro ao acessar a página: ' . $e->getMessage());
         }
-
 
         return new Response(
             url: $request->url(),
             httpClient: $this
         );
-    }
-
-    private function get(Request $request): void
-    {
-        $this->driver->get($request->url());
-    } 
-
-    private function post(Request $request): void
-    {
-        $this->driver->get('data:,');
-
-        $inputs = "";
-        foreach ($request->data() as $key => $value) {
-            $inputs .=  <<<"JS"
-            const hiddenField_{$key} = document.createElement('input');
-            hiddenField_{$key}.type = 'hidden';
-            hiddenField_{$key}.name = '{$key}';
-            hiddenField_{$key}.value = '{$value}';
-
-            form.appendChild(hiddenField_{$key});
-        JS;
-        }
-
-        $script = <<<"JS"
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '{$request->url()}';
-            document.body.appendChild(form);
-
-            {$inputs}
-
-            form.submit();
-            JS;
-        $this->driver->executeScript( $script );
     }
 
     public function bodyHtml(): string
@@ -103,23 +65,58 @@ class HttpClientWebDriver implements HttpClientInterface
 
     public function css(string $selector): ?HttpClientElementInterface
     {
-        try{
-            $remoteWebElement = $this->driver->findElement( WebDriverBy::cssSelector($selector) );
-            return new HttpClientWebDriverElement( 
-                remoteWebElement: $remoteWebElement,
-                driver: $this->driver
-            );
-        }catch(NoSuchElementException $e){
+        try {
+            $remoteWebElement = $this->driver->findElement(WebDriverBy::cssSelector($selector));
+            return new HttpClientWebDriverElement(remoteWebElement: $remoteWebElement, driver: $this->driver);
+        } catch (NoSuchElementException $e) {
             return null;
         }
     }
 
     public function cssEach(string $selector, Closure $closure): void
     {
-        $elements = $this->driver->findElements( WebDriverBy::cssSelector($selector) );
+        $elements = $this->driver->findElements(WebDriverBy::cssSelector($selector));
 
         foreach ($elements as $key => $element) {
-            $closure(new HttpClientWebDriverElement( remoteWebElement: $element, driver: $this->driver), $key);
+            $closure(new HttpClientWebDriverElement(remoteWebElement: $element, driver: $this->driver), $key);
         }
+    }
+
+    public function jsInputFields(array $data): string
+    {
+        $inputs = '';
+        foreach ($data as $key => $value) {
+            $inputs .= <<<"JS"
+            const hiddenField_{$key} = document.createElement('input');
+            hiddenField_{$key}.type = 'hidden';
+            hiddenField_{$key}.name = '{$key}';
+            hiddenField_{$key}.value = '{$value}';
+
+            form.appendChild(hiddenField_{$key});
+        JS;
+        }
+        return $inputs;
+    }
+
+    private function get(Request $request): void
+    {
+        $this->driver->get($request->url());
+    }
+
+    private function post(Request $request): void
+    {
+        $this->driver->get('data:,');
+
+        $inputs = $this->jsInputFields($request->data());
+
+        $script = <<<"JS"
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{$request->url()}';
+            document.body.appendChild(form);
+            {$inputs}
+            form.submit();
+            JS;
+        $this->driver->executeScript($script);
     }
 }

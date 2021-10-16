@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace ScraPHP;
 
 use Closure;
-use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\HttpClient\HttpClientElementInterface;
+use ScraPHP\HttpClient\HttpClientInterface;
 
-class Response
+final class Response
 {
     public function __construct(
         private string $url,
         private HttpClientInterface $httpClient
-    ){}
-
+    ) {
+    }
 
     public function bodyHtml(): string
     {

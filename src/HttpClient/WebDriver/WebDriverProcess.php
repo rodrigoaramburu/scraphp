@@ -6,13 +6,13 @@ namespace ScraPHP\HttpClient\WebDriver;
 
 use Symfony\Component\Process\Process;
 
-class WebDriverProcess
+final class WebDriverProcess
 {
+    private static string $chromeDriverPath = 'chromedriver';
+    private Process $process;
 
-    private static string $chromeDriverPath = 'chromedriver'; 
-    private Process $process; 
-
-    public function __construct(){
+    public function __construct()
+    {
         $this->process = new Process([self::$chromeDriverPath, '--port=4444']);
     }
 
@@ -24,7 +24,7 @@ class WebDriverProcess
     public function run(): void
     {
         $this->process->start();
-        while(! str_contains( $this->process->getOutput(), 'was started successfully' )){
+        while (! str_contains($this->process->getOutput(), 'was started successfully')) {
             sleep(1);
         }
     }
@@ -34,9 +34,8 @@ class WebDriverProcess
         $this->process->stop();
     }
 
-    public function pid()
+    public function pid(): ?int
     {
         return $this->process->getPid();
     }
-
 }

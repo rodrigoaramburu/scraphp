@@ -6,7 +6,6 @@ namespace ScraPHP\HttpClient;
 
 use Exception;
 
-class HttpClientException extends Exception
+final class HttpClientException extends Exception
 {
-
 }

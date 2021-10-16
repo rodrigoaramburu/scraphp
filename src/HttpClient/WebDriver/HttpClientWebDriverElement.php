@@ -1,19 +1,21 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\WebDriver;
 
 use Closure;
-use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\Exception\NoSuchElementException;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriverBy;
 use ScraPHP\HttpClient\HttpClientElementInterface;
-use Facebook\WebDriver\Exception\NoSuchElementException;
 
-class HttpClientWebDriverElement implements HttpClientElementInterface
+final class HttpClientWebDriverElement implements HttpClientElementInterface
 {
-    public function __construct(private RemoteWebElement $remoteWebElement, private RemoteWebDriver $driver){}
+    public function __construct(private RemoteWebElement $remoteWebElement, private RemoteWebDriver $driver)
+    {
+    }
 
     public function text(): string
     {
@@ -29,26 +31,25 @@ class HttpClientWebDriverElement implements HttpClientElementInterface
     {
         $elements = $this->remoteWebElement->findElements(WebDriverBy::cssSelector($selector));
 
-        foreach($elements as $key => $element){
-            $closure( new HttpClientWebDriverElement( remoteWebElement: $element, driver: $this->driver), $key);
+        foreach ($elements as $key => $element) {
+            $closure(new HttpClientWebDriverElement(remoteWebElement: $element, driver: $this->driver), $key);
         }
     }
 
     public function html(): string
     {
-        $innerHtml = $this->driver->executeScript('return arguments[0].innerHTML', [$this->remoteWebElement]);
-        return $innerHtml; 
-    } 
+        return $this->driver->executeScript('return arguments[0].innerHTML', [$this->remoteWebElement]);
+    }
 
     public function css(string $selector): ?HttpClientElementInterface
     {
-        try{
-            $remoteWebElement = $this->remoteWebElement->findElement( WebDriverBy::cssSelector($selector) );
-            return new HttpClientWebDriverElement( 
+        try {
+            $remoteWebElement = $this->remoteWebElement->findElement(WebDriverBy::cssSelector($selector));
+            return new HttpClientWebDriverElement(
                 remoteWebElement: $remoteWebElement,
                 driver: $this->driver
             );
-        }catch(NoSuchElementException $e){
+        } catch (NoSuchElementException $e) {
             return null;
         }
     }

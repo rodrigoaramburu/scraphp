@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace ScraPHP\Writers;
 
-use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-use ScraPHP\Writers\WriterInterface;
+use Monolog\Logger;
 
 final class LogWriter implements WriterInterface
 {
-
     private Logger $logger;
 
     public function __construct(string $stream = 'php://stdout')
@@ -24,4 +22,4 @@ final class LogWriter implements WriterInterface
     {
         $this->logger->info(\json_encode($data));
     }
-} 
+}

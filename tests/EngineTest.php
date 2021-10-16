@@ -4,6 +4,8 @@ use ScraPHP\Scrap;
 use ScraPHP\Engine;
 use ScraPHP\Request;
 use ScraPHP\Response;
+use ScraPHP\Util\Clock;
+use ScraPHP\Util\ClockInterface;
 use ScraPHP\Writers\WriterInterface;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
@@ -84,4 +86,29 @@ test('deve tentar novamente se request não encontrado', function(){
             ->start();
 
     expect($scrap->retry())->toBe(3);
+});
+
+
+test('deve atrasar execucao se scrap tem definido um dalay', function(){
+    $request = new Request(url: 'http://example.com');
+
+    $scrap = new class extends Scrap{
+        public function parse(Response $response): Generator{
+            yield [];
+        }
+    };
+
+    $scrap->addRequest( request: $request);
+    $scrap->changeDelay(delay: 30);
+
+    $httpClient = $this->createMock(HttpClientInterface::class);
+    $httpClient->method('access')->willReturn(new Response(url: 'http://example.com', httpClient: $httpClient));
+
+    $clock = $this->createMock(ClockInterface::class);
+    $clock->expects($this->once())->method('delay')->with(30);
+    
+    $engine = new Engine(httpClient: $httpClient, clock: $clock);
+    $engine->scrap(scrap: $scrap)
+            ->start();
+
 });

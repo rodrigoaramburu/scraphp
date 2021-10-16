@@ -1,6 +1,8 @@
 {
     "name": "rodrigoaramburu/scraphp",
     "type": "library",
+    "license": "MIT",
+    "description": "Biblioteca para raspagem de dados na web",
     "authors": [
         {
             "name": "rodrigoaramburu",
@@ -13,7 +15,8 @@
         }
     },
     "require-dev": {
-        "pestphp/pest": "^1.16"
+        "pestphp/pest": "^1.16",
+        "nunomaduro/phpinsights": "^2.0"
     },
     "require": {
         "symfony/process": "^5.3",
@@ -25,6 +28,7 @@
     },
     "scripts":{
         "test": "./vendor/bin/pest",
-        "coverage-report": "./vendor/bin/pest --coverage-html coverage"
+        "coverage-report": "./vendor/bin/pest --coverage-html coverage",
+        "insights": "./vendor/bin/phpinsights"
     }
 }

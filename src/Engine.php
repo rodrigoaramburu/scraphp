@@ -4,35 +4,42 @@ declare(strict_types=1);
 
 namespace ScraPHP;
 
-use ScraPHP\Scrap;
-use Monolog\Logger;
+use Generator;
 use Monolog\Handler\StreamHandler;
-use ScraPHP\HttpClient\Simple\HttpClient;
+use Monolog\Logger;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
-use ScraPHP\HttpClient\WebDriver\WebDriverProcess;
+use ScraPHP\HttpClient\Simple\HttpClient;
 use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
+use ScraPHP\HttpClient\WebDriver\WebDriverProcess;
+use ScraPHP\Util\Clock;
+use ScraPHP\Util\ClockInterface;
 
 final class Engine
 {
     private array $scraps;
-    private HttpClientInterface $httpClient; 
+    private HttpClientInterface $httpClient;
     private WebDriverProcess $webDriverProcess;
     private Logger $logger;
+    private ClockInterface $clock;
 
-    public function __construct(?HttpClientInterface $httpClient = null, ?Logger $looger = null)
-    {
+    public function __construct(
+        ?HttpClientInterface $httpClient = null,
+        ?Logger $looger = null,
+        ?ClockInterface $clock = null
+    ) {
         $this->httpClient = $httpClient ?? new HttpClient();
-     
-        if( $looger === null){
+        $this->clock = $clock ?? new Clock();
+
+        if ($looger === null) {
             $this->logger = new Logger('ScraPHP.Engine');
             $handler = new StreamHandler('php://stdout', Logger::DEBUG);
             $this->logger->pushHandler($handler);
-        }else{
-            $this->logger = $logger; 
+        } else {
+            $this->logger = $logger;
         }
     }
-    
+
     public function scrap(Scrap $scrap): self
     {
         $this->scraps[] = $scrap;
@@ -61,29 +68,35 @@ final class Engine
 
     public function start(): void
     {
-        foreach($this->scraps as $scrap){
+        foreach ($this->scraps as $scrap) {
             $this->processScrap(scrap: $scrap);
         }
     }
 
     private function processScrap(Scrap $scrap): void
     {
-        while($request = $scrap->nextRequest() ){
-            try{
+        while ($request = $scrap->nextRequest()) {
+            try {
+                $this->clock->delay($scrap->delay());
+
                 $response = $this->httpClient->access(request: $request);
                 $generator = $scrap->parse(response: $response);
-                $generator->rewind();
-                $writers = $scrap->writers();
-                foreach ($generator as $data) {
-                    foreach($writers as $writer){
-                        $writer->data($data);
-                    }
-                }
-            }catch(HttpClientException $e){
+
+                $this->processWriters(generator: $generator, writers: $scrap->writers());
+            } catch (HttpClientException $e) {
                 $scrap->failRequest($request);
                 $this->logger->error("Não foi possível acessar:  {$request->url()} - {$request->failCount()} fails");
             }
         }
-     
+    }
+
+    private function processWriters(Generator $generator, array $writers): void
+    {
+        $generator->rewind();
+        foreach ($generator as $data) {
+            foreach ($writers as $writer) {
+                $writer->data($data);
+            }
+        }
     }
 }

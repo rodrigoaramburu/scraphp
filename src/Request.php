@@ -1,15 +1,12 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
 namespace ScraPHP;
 
-use ScraPHP\Request;
-
-class Request
+final class Request
 {
-
-    public const GET = 'GET'; 
+    public const GET = 'GET';
     public const POST = 'POST';
 
     private $failCount = 0;
@@ -18,8 +15,8 @@ class Request
         private string $url,
         private string $method = Request::GET,
         private array $data = [],
-    ){}
-
+    ) {
+    }
 
     public function url(): string
     {
