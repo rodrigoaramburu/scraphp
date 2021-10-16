@@ -1,0 +1,10 @@
+parameters:
+    level: 6
+    paths:
+        - src
+        - tests
+
+    ignoreErrors:
+        -
+            message: 'Undefined variable: $this'
+            path: tests/*

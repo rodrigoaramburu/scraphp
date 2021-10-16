@@ -20,17 +20,23 @@ final class Engine
     private WebDriverProcess $webDriverProcess;
     private Logger $logger;
 
-    public function __construct()
+    public function __construct(?HttpClientInterface $httpClient = null, ?Logger $looger = null)
     {
-        $this->httpClient = new HttpClient();
-        $this->logger = new Logger('ScraPHP.Engine');
-        $handler = new StreamHandler('php://stdout', Logger::DEBUG);
-        $this->logger->pushHandler($handler);
+        $this->httpClient = $httpClient ?? new HttpClient();
+     
+        if( $looger === null){
+            $this->logger = new Logger('ScraPHP.Engine');
+            $handler = new StreamHandler('php://stdout', Logger::DEBUG);
+            $this->logger->pushHandler($handler);
+        }else{
+            $this->logger = $logger; 
+        }
     }
     
-    public function scrap(Scrap $scrap): void
+    public function scrap(Scrap $scrap): self
     {
         $this->scraps[] = $scrap;
+        return $this;
     }
 
     public function scraps(): array
@@ -38,21 +44,19 @@ final class Engine
         return $this->scraps;
     }
 
-    public function useWebDriver(): void
+    public function useWebDriver(): self
     {
         $this->webDriverProcess = new WebDriverProcess();
         $this->webDriverProcess->run();
 
         $this->httpClient = new HttpClientWebDriver();
+
+        return $this;
     }
 
-    public function httpClient(): HttpClientInterface
+    public function httpClient(): ?HttpClientInterface
     {
         return $this->httpClient;
-    }
-    public function setHttpClient(HttpClientInterface $httpClient): void
-    {
-        $this->httpClient = $httpClient;
     }
 
     public function start(): void

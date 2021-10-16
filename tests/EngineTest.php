@@ -79,10 +79,9 @@ test('deve tentar novamente se request não encontrado', function(){
     $httpClient = $this->createMock(HttpClientInterface::class);
     $httpClient->method('access')->with($request)->will($this->throwException(new HttpClientException()));
     
-    $engine = new Engine();
-    $engine->setHttpClient($httpClient);
-    $engine->scrap($scrap);
-    $engine->start();
+    $engine = new Engine(httpClient: $httpClient);
+    $engine->scrap($scrap)
+            ->start();
 
     expect($scrap->retry())->toBe(3);
 });
