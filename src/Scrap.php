@@ -5,21 +5,24 @@ declare(strict_types=1);
 namespace ScraPHP;
 
 use Generator;
+use ScraPHP\Response;
+use ScraPHP\Middleware\Middleware;
 use ScraPHP\Writers\WriterInterface;
 
 abstract class Scrap
 {
-    /* @var $requests Request[] */
     private array $requests = [];
     private array $writers = [];
     private int $retry = 3;
-    private int $delay = 0;
+    
+    private array $middlewares = [];
 
     abstract public function parse(Response $response): Generator;
 
-    public function addRequest(Request $request): void
+    public function addRequest(Request $request): self
     {
         $this->requests[] = $request;
+        return $this;
     }
 
     public function nextRequest(): ?Request
@@ -27,9 +30,10 @@ abstract class Scrap
         return array_shift($this->requests);
     }
 
-    public function addWriter(WriterInterface $writer): void
+    public function addWriter(WriterInterface $writer): self
     {
         $this->writers[] = $writer;
+        return $this;
     }
 
     public function writers(): array
@@ -50,12 +54,42 @@ abstract class Scrap
         }
     }
 
-    public function changeDelay(int $delay): void
+    public function middleware(Middleware $middleware): self
     {
-        $this->delay = $delay;
+        $this->middlewares[] = $middleware;
+        return $this;
+    }    
+
+    public function middlewares(): array
+    {
+        return $this->middlewares;
     }
-    public function delay(): int
+
+    public function middlewareBeforeAll(): void
     {
-        return $this->delay;
+        foreach ($this->middlewares as $key => $middleware) {
+            $middleware->beforeAll(scrap: $this);
+        }
+    }
+
+    public function middlewareAfterAll(): void
+    {
+        foreach ($this->middlewares as $key => $middleware) {
+            $middleware->afterAll(scrap: $this);
+        }
+    }
+
+    public function middlewareBeforeRequest(Scrap $scrap, Request $request): void
+    {
+        foreach ($this->middlewares as $key => $middleware) {
+            $middleware->beforeRequest(scrap: $scrap, request: $request);
+        }
+    }
+
+    public function middlewareAfterRequest(Scrap $scrap, Response $response): void
+    {
+        foreach ($this->middlewares as $key => $middleware) {
+            $middleware->afterRequest(scrap: $scrap, response: $response);
+        }
     }
 }

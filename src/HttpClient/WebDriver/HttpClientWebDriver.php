@@ -43,19 +43,14 @@ final class HttpClientWebDriver implements HttpClientInterface
     {
         try {
             if ($request->method() === 'GET') {
-                $this->get($request);
+                return $this->get($request);
             }
             if ($request->method() === 'POST') {
-                $this->post($request);
+                return $this->post($request);
             }
         } catch (Exception $e) {
             throw new HttpClientException('Erro ao acessar a página: ' . $e->getMessage());
         }
-
-        return new Response(
-            url: $request->url(),
-            httpClient: $this
-        );
     }
 
     public function bodyHtml(): string
@@ -98,12 +93,18 @@ final class HttpClientWebDriver implements HttpClientInterface
         return $inputs;
     }
 
-    private function get(Request $request): void
+    private function get(Request $request): Response
     {
         $this->driver->get($request->url());
+
+        return new Response(
+            url: $request->url(),
+            httpClient: $this,
+            statusCode: -1
+        );
     }
 
-    private function post(Request $request): void
+    private function post(Request $request): Response
     {
         $this->driver->get('data:,');
 
@@ -118,5 +119,11 @@ final class HttpClientWebDriver implements HttpClientInterface
             form.submit();
             JS;
         $this->driver->executeScript($script);
+
+        return new Response(
+            url: $request->url(),
+            httpClient: $this,
+            statusCode: -1
+        );
     }
 }

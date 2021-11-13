@@ -69,7 +69,9 @@ final class Engine
     public function start(): void
     {
         foreach ($this->scraps as $scrap) {
+            $scrap->middlewareBeforeAll();
             $this->processScrap(scrap: $scrap);
+            $scrap->middlewareAfterAll();
         }
     }
 
@@ -77,9 +79,11 @@ final class Engine
     {
         while ($request = $scrap->nextRequest()) {
             try {
-                $this->clock->delay($scrap->delay());
-
+                
+                $scrap->middlewareBeforeRequest($scrap, $request);
                 $response = $this->httpClient->access(request: $request);
+                $scrap->middlewareAfterRequest($scrap, $response);
+
                 $generator = $scrap->parse(response: $response);
 
                 $this->processWriters(generator: $generator, writers: $scrap->writers());

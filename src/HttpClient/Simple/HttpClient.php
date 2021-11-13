@@ -19,6 +19,7 @@ final class HttpClient implements HttpClientInterface
 {
     private SymfonyHttpClientInterface $client;
     private string $bodyHtml;
+    private int $statusCode;
 
     public function __construct()
     {
@@ -31,19 +32,17 @@ final class HttpClient implements HttpClientInterface
 
         try {
             if ($request->method() === 'GET') {
-                $this->get($request);
+                return $this->get($request);
             }
             if ($request->method() === 'POST') {
-                $this->post($request);
+                return  $this->post($request);
             }
+            return null;
         } catch (Exception $e) {
             throw new HttpClientException('Erro ao acessar a página: ' . $e->getMessage());
         }
 
-        return new Response(
-            url: $request->url(),
-            httpClient: $this
-        );
+        
     }
 
     public function bodyHtml(): string
@@ -70,17 +69,27 @@ final class HttpClient implements HttpClientInterface
         });
     }
 
-    private function get(Request $request): void
+    private function get(Request $request): Response
     {
         $result = $this->client->request('GET', $request->url());
         $this->bodyHtml = $result->getContent();
+        return new Response(
+            url: $request->url(),
+            httpClient: $this,
+            statusCode: $result->getStatusCode(),
+        );
     }
-
-    private function post(Request $request): void
+    
+    private function post(Request $request): Response
     {
         $result = $this->client->request('POST', $request->url(), [
             'body' => $request->data(),
         ]);
         $this->bodyHtml = $result->getContent();
+        return new Response(
+            url: $request->url(),
+            httpClient: $this,
+            statusCode: $result->getStatusCode(),
+        );
     }
 }

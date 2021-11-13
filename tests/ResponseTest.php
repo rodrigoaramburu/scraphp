@@ -14,6 +14,7 @@ test('deve chamar filtro css do httpclient', function(){
     $response = new Response(
         url: 'http://example.com',
         httpClient: $httpClient,
+        statusCode: 0
     );
 
     $value = $response->css('.seletor');
@@ -33,6 +34,7 @@ test('deve chamar  cssEach do httpclient', function(){
     $response = new Response(
         url: 'http://example.com',
         httpClient: $httpClient,
+        statusCode: 0
     );
 
     $value = $response->cssEach('.seletor', $closure);

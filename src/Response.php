@@ -12,13 +12,19 @@ final class Response
 {
     public function __construct(
         private string $url,
-        private HttpClientInterface $httpClient
+        private HttpClientInterface $httpClient,
+        private int $statusCode,
     ) {
     }
 
     public function bodyHtml(): string
     {
         return $this->httpClient->bodyHtml();
+    }
+
+    public function statusCode(): int
+    {
+        return $this->statusCode;
     }
 
     public function css(string $selector): ?HttpClientElementInterface
