@@ -7,22 +7,19 @@ use ScraPHP\Response;
 use Symfony\Component\Process\Process;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientElementInterface;
-use ScraPHP\HttpClient\WebDriver\WebDriverProcess;
 use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
 
 $httpServerProcess = null;
-$webDriverProcess = new WebDriverProcess();
 
 beforeAll( function() use(&$httpServerProcess, &$webDriverProcess){
     $httpServerProcess = new Process(['php', '-S' ,'localhost:9666', '-t', 'tests/pages/']);
     $httpServerProcess->start();
 
-    $webDriverProcess->run();
+   
 });
 
 afterAll(function() use(&$httpServerProcess, &$webDriverProcess) {
     $httpServerProcess->stop();
-    $webDriverProcess->stop();
 });
 
 

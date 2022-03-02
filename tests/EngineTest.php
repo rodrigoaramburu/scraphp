@@ -19,7 +19,7 @@ function arrayAsGenerator(array $array)
 }
 
 
-test('Deve adicionar um scrap', function(){
+test('deve adicionar um scrap', function(){
 
     $engine = new Engine();
 
@@ -61,7 +61,11 @@ test('deve processar um scrap', function(){
 
 test('deve permitir usar httpwebdriver', function(){
     $engine = new Engine();
-    $engine->useWebDriver();
+    try{
+        $engine->useWebDriver();
+    }catch(Exception $e){
+        echo $e->getMessage();
+    }
 
     expect($engine->httpClient())->toBeInstanceOf(HttpClientWebDriver::class);
 });

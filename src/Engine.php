@@ -12,8 +12,6 @@ use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\HttpClient\Simple\HttpClient;
 use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
 use ScraPHP\HttpClient\WebDriver\WebDriverProcess;
-use ScraPHP\Util\Clock;
-use ScraPHP\Util\ClockInterface;
 
 final class Engine
 {
@@ -21,7 +19,6 @@ final class Engine
     private HttpClientInterface $httpClient;
     private WebDriverProcess $webDriverProcess;
     private Logger $logger;
-    private ClockInterface $clock;
 
     public function __construct(
         ?HttpClientInterface $httpClient = null,
@@ -29,8 +26,7 @@ final class Engine
         ?ClockInterface $clock = null
     ) {
         $this->httpClient = $httpClient ?? new HttpClient();
-        $this->clock = $clock ?? new Clock();
-
+        
         if ($looger === null) {
             $this->logger = new Logger('ScraPHP.Engine');
             $handler = new StreamHandler('php://stdout', Logger::DEBUG);
@@ -53,9 +49,6 @@ final class Engine
 
     public function useWebDriver(): self
     {
-        $this->webDriverProcess = new WebDriverProcess();
-        $this->webDriverProcess->run();
-
         $this->httpClient = new HttpClientWebDriver();
 
         return $this;

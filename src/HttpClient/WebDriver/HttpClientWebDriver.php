@@ -23,7 +23,7 @@ final class HttpClientWebDriver implements HttpClientInterface
     private Process $process;
     private RemoteWebDriver $driver;
 
-    public function __construct()
+    public function __construct(string $url = 'http://localhost:4444')
     {
         $chromeOptions = new ChromeOptions();
         $chromeOptions->addArguments(['-headless']);
@@ -31,7 +31,7 @@ final class HttpClientWebDriver implements HttpClientInterface
         $desiredCapabilities = DesiredCapabilities::chrome();
         $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
-        $this->driver = RemoteWebDriver::create('http://localhost:4444', $desiredCapabilities);
+        $this->driver = RemoteWebDriver::create($url, $desiredCapabilities);
     }
 
     public function __destruct()
