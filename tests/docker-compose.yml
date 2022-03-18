@@ -1,0 +1,16 @@
+version: '3.1'
+services:
+  php:
+    container_name: 'scraphp_test_php'
+    build: docker/php
+    working_dir: /application
+    volumes:
+      - './pages:/application'
+    ports:
+      - '9666:9666'
+
+  selenium: 
+    image: selenium/standalone-chrome:4.1.2-20220217
+    container_name: scraphp_test_selenium
+    network_mode: "host"
+
