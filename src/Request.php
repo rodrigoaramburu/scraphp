@@ -10,6 +10,10 @@ final class Request
     public const POST = 'POST';
 
     private $failCount = 0;
+
+    /**
+     * @var array<string,string>
+     */
     private array $body = [];
 
     private function __construct(
@@ -41,6 +45,9 @@ final class Request
         return $this;
     }
 
+    /**
+     * @return array<string,string>
+     */
     public function body(): array
     {
         return $this->body;

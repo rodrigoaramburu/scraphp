@@ -27,13 +27,15 @@ final class HttpClientWebDriverElement implements HttpClientElementInterface
         return $this->remoteWebElement->getAttribute($attr);
     }
 
-    public function each(string $selector, Closure $closure): void
+    public function each(string $selector, Closure $closure): array
     {
         $elements = $this->remoteWebElement->findElements(WebDriverBy::cssSelector($selector));
 
+        $data = [];
         foreach ($elements as $key => $element) {
-            $closure(new HttpClientWebDriverElement(remoteWebElement: $element, driver: $this->driver), $key);
+            $data[] = $closure(new HttpClientWebDriverElement(remoteWebElement: $element, driver: $this->driver), $key);
         }
+        return $data;
     }
 
     public function html(): string

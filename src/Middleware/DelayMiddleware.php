@@ -9,7 +9,7 @@ use ScraPHP\Scrap;
 use ScraPHP\Util\Clock;
 use ScraPHP\Util\ClockInterface;
 
-class DelayMiddleware extends Middleware
+final class DelayMiddleware extends Middleware
 {
     private ClockInterface $clock;
     private int $secs;

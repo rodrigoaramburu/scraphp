@@ -10,10 +10,20 @@ use ScraPHP\Writers\WriterInterface;
 
 abstract class Scrap
 {
+    /**
+     * @var array<Request>
+     */
     private array $requests = [];
+
+    /**
+     * @var array<WriterInterface>
+     */
     private array $writers = [];
     private int $retry = 3;
 
+    /**
+     * @var array<Middleware>
+     */
     private array $middlewares = [];
 
     abstract public function parse(Response $response): Generator;
@@ -35,6 +45,9 @@ abstract class Scrap
         return $this;
     }
 
+    /**
+     * @return array<WriterInterface>
+     */
     public function writers(): array
     {
         return $this->writers;
@@ -59,6 +72,9 @@ abstract class Scrap
         return $this;
     }
 
+    /**
+     * @return array<Middleware>
+     */
     public function middlewares(): array
     {
         return $this->middlewares;
@@ -66,14 +82,14 @@ abstract class Scrap
 
     public function middlewareBeforeAll(): void
     {
-        foreach ($this->middlewares as $key => $middleware) {
+        foreach ($this->middlewares as $middleware) {
             $middleware->beforeAll(scrap: $this);
         }
     }
 
     public function middlewareAfterAll(): void
     {
-        foreach ($this->middlewares as $key => $middleware) {
+        foreach ($this->middlewares as $middleware) {
             $middleware->afterAll(scrap: $this);
         }
     }

@@ -24,12 +24,12 @@ test('deve chamar filtro css do httpclient', function(){
 
 test('deve chamar  cssEach do httpclient', function(){
 
-    $closure = function($ele){
-
+    $closure = function($element){
+        return [1,2,3];
     };
 
     $httpClient = $this->createMock(HttpClientInterface::class);
-    $httpClient->expects( $this->once())->method('cssEach')->with('.seletor', $closure);
+    $httpClient->expects( $this->once())->method('cssEach')->with('.seletor', $closure)->willReturn([1,2,3]);
 
     $response = new Response(
         url: 'http://example.com',
@@ -39,5 +39,5 @@ test('deve chamar  cssEach do httpclient', function(){
 
     $value = $response->cssEach('.seletor', $closure);
 
-    expect($value)->toBeNull();
+    expect($value)->toBe([1,2,3]);
 });

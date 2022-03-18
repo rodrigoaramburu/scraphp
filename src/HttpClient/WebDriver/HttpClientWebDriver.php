@@ -72,13 +72,15 @@ final class HttpClientWebDriver implements HttpClientInterface
         }
     }
 
-    public function cssEach(string $selector, Closure $closure): void
+    public function cssEach(string $selector, Closure $closure): array
     {
         $elements = $this->driver->findElements(WebDriverBy::cssSelector($selector));
 
+        $data = [];
         foreach ($elements as $key => $element) {
-            $closure(new HttpClientWebDriverElement(remoteWebElement: $element, driver: $this->driver), $key);
+            $data[] = $closure(new HttpClientWebDriverElement(remoteWebElement: $element, driver: $this->driver), $key);
         }
+        return $data;
     }
 
     public function jsInputFields(array $data): string

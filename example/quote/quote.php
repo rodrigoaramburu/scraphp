@@ -16,9 +16,8 @@ final class QuoteScrap extends Scrap
 {
     public function parse(Response $response): Generator
     {
-        $data = [];
-        $response->cssEach('.quote', static function (HttpClientElementInterface $element) use (&$data): void {
-            $data[] = [
+        $data = $response->cssEach('.quote', static function (HttpClientElementInterface $element){
+            return [
                 'text' => $element->css('.text')->text(),
                 'author' => $element->css('.author')->text(),
             ];

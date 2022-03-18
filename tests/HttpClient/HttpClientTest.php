@@ -62,10 +62,8 @@ test('deve percorrer os elementos filhos ',function(){
 
     $httpClient->access( Request::create(url: 'http://localhost:9666/page1.php'));
     
-    $expectTexts = [];
-
-    $httpClient->css('.lista')->each('li', function(HttpClientElementInterface $httpClientElement) use(&$expectTexts){
-        $expectTexts[] = $httpClientElement->text();
+    $expectTexts = $httpClient->css('.lista')->each('li', function(HttpClientElementInterface $httpClientElement){
+        return $httpClientElement->text();
     } );
 
     expect($expectTexts)->toBe(['Item 1','Item 2','Item 3','Item 4']);

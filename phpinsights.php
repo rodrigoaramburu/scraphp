@@ -52,6 +52,8 @@ return [
 
     'exclude' => [
         'example',
+        'src/Middleware/Middleware.php',
+        'phpinsights.php'
     ],
 
     'add' => [
@@ -63,12 +65,17 @@ return [
     'remove' => [
         //  ExampleInsight::class,
         SlevomatCodingStandard\Sniffs\Classes\SuperfluousInterfaceNamingSniff::class,
+        SlevomatCodingStandard\Sniffs\Classes\SuperfluousExceptionNamingSniff::class
     ],
 
     'config' => [
         //  ExampleInsight::class => [
         //      'key' => 'value',
         //  ],
+        \PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff::class => [
+            'lineLimit' => 120,
+            'absoluteLineLimit' => 160
+        ]
     ],
 
     /*

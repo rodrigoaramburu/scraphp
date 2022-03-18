@@ -10,7 +10,7 @@ use ScraPHP\Request;
 use ScraPHP\Response;
 use ScraPHP\Scrap;
 
-class LogMiddleware extends Middleware
+final class LogMiddleware extends Middleware
 {
     private Logger $logger;
 
@@ -40,6 +40,8 @@ class LogMiddleware extends Middleware
     public function afterRequest(Scrap $scrap, Response $response): void
     {
         $scrapName = $scrap::class;
-        $this->logger->info("{$scrapName} - Status Code:{$response->statusCode()}");
+        $this
+            ->logger
+            ->info("{$scrapName} - Status Code:{$response->statusCode()}");
     }
 }

@@ -58,11 +58,11 @@ final class HttpClient implements HttpClientInterface
         return new HttpClientElement(crawler: $crawler);
     }
 
-    public function cssEach(string $selector, Closure $closure): void
+    public function cssEach(string $selector, Closure $closure): array
     {
         $crawler = new Crawler($this->bodyHtml);
         $filter = $crawler->filter($selector);
-        $data = $filter->each(static function (Crawler $crawler, int $i) use ($closure) {
+        return $filter->each(static function (Crawler $crawler, int $i) use ($closure) {
             return $closure(new HttpClientElement(crawler: $crawler), $i);
         });
     }

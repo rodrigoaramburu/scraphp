@@ -11,23 +11,20 @@ use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\HttpClient\Simple\HttpClient;
 use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
-use ScraPHP\HttpClient\WebDriver\WebDriverProcess;
 
 final class Engine
 {
     private array $scraps;
     private HttpClientInterface $httpClient;
-    private WebDriverProcess $webDriverProcess;
     private Logger $logger;
 
     public function __construct(
         ?HttpClientInterface $httpClient = null,
-        ?Logger $looger = null,
-        ?ClockInterface $clock = null
+        ?Logger $logger = null
     ) {
         $this->httpClient = $httpClient ?? new HttpClient();
 
-        if ($looger === null) {
+        if ($logger === null) {
             $this->logger = new Logger('ScraPHP.Engine');
             $handler = new StreamHandler('php://stdout', Logger::DEBUG);
             $this->logger->pushHandler($handler);

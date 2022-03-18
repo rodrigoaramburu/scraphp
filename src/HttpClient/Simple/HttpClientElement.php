@@ -24,10 +24,10 @@ final class HttpClientElement implements HttpClientElementInterface
         return $this->crawler->attr($attr);
     }
 
-    public function each(string $selector, Closure $closure): void
+    public function each(string $selector, Closure $closure): array
     {
         $filter = $this->crawler->filter($selector);
-        $data = $filter->each(static function (Crawler $crawler, int $i) use ($closure) {
+        return $filter->each(static function (Crawler $crawler, int $i) use ($closure) {
             return $closure(new HttpClientElement(crawler: $crawler), $i);
         });
     }

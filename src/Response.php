@@ -32,8 +32,8 @@ final class Response
         return $this->httpClient->css($selector);
     }
 
-    public function cssEach(string $selector, Closure $closure): void
+    public function cssEach(string $selector, Closure $closure): array
     {
-        $this->httpClient->cssEach($selector, $closure);
+        return $this->httpClient->cssEach($selector, $closure);
     }
 }
