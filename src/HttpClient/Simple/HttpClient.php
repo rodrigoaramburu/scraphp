@@ -35,14 +35,12 @@ final class HttpClient implements HttpClientInterface
                 return $this->get($request);
             }
             if ($request->method() === 'POST') {
-                return  $this->post($request);
+                return $this->post($request);
             }
             return null;
         } catch (Exception $e) {
             throw new HttpClientException('Erro ao acessar a página: ' . $e->getMessage());
         }
-
-        
     }
 
     public function bodyHtml(): string
@@ -79,11 +77,11 @@ final class HttpClient implements HttpClientInterface
             statusCode: $result->getStatusCode(),
         );
     }
-    
+
     private function post(Request $request): Response
     {
         $result = $this->client->request('POST', $request->url(), [
-            'body' => $request->getBody(),
+            'body' => $request->body(),
         ]);
         $this->bodyHtml = $result->getContent();
         return new Response(

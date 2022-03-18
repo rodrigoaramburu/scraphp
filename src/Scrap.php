@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace ScraPHP;
 
 use Generator;
-use ScraPHP\Response;
 use ScraPHP\Middleware\Middleware;
 use ScraPHP\Writers\WriterInterface;
 
@@ -14,7 +13,7 @@ abstract class Scrap
     private array $requests = [];
     private array $writers = [];
     private int $retry = 3;
-    
+
     private array $middlewares = [];
 
     abstract public function parse(Response $response): Generator;
@@ -58,7 +57,7 @@ abstract class Scrap
     {
         $this->middlewares[] = $middleware;
         return $this;
-    }    
+    }
 
     public function middlewares(): array
     {

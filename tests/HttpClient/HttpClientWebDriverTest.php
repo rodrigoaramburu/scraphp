@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use ScraPHP\Request;
 use ScraPHP\Response;
-use Symfony\Component\Process\Process;
+use ScraPHP\Util\ClockInterface;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientElementInterface;
 use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
@@ -93,7 +93,7 @@ test('deve realizar uma requisição post', function(){
 
     $request = Request::create(url: 'http://localhost:9666/post.php')
             ->post()
-            ->body(
+            ->changeBody(
                 body: [
                     'nome' => 'Joao',
                     'sobrenome' => 'Silva',
@@ -143,4 +143,35 @@ test('deve retornar null se o elemento não exitir', function(){
     expect($httpClient->css('.nao-existe'))->toBeNull();
 
     expect($httpClient->css('.lista')->css('img'))->toBeNull();
+});
+
+
+
+test('deve executar um delay após a requisição get ser realizada', function(){
+
+    $clockMock = $this->createMock(ClockInterface::class);
+    $httpClient = new HttpClientWebDriver(waitTimeAfterRequestSec: 5);
+    $httpClient->changeClock($clockMock);
+
+    $clockMock->expects($this->once())->method('delay')->with(5);
+
+    $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
+
+});
+
+
+test('deve executar um delay após a requisição post ser realizada', function(){
+
+    $clockMock = $this->createMock(ClockInterface::class);
+    $httpClient = new HttpClientWebDriver(waitTimeAfterRequestSec: 5);
+    $httpClient->changeClock($clockMock);
+
+    $clockMock->expects($this->once())->method('delay')->with(5);
+
+    $httpClient->access(
+        Request::create(url: 'http://localhost:9666/post.php')
+        ->post()
+    );
+   
+
 });

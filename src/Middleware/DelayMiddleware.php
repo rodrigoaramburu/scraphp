@@ -1,21 +1,16 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
-
 namespace ScraPHP\Middleware;
 
-use ScraPHP\Scrap;
-use Monolog\Logger;
 use ScraPHP\Request;
-use ScraPHP\Response;
+use ScraPHP\Scrap;
 use ScraPHP\Util\Clock;
 use ScraPHP\Util\ClockInterface;
-use Monolog\Handler\StreamHandler;
 
 class DelayMiddleware extends Middleware
 {
-
     private ClockInterface $clock;
     private int $secs;
 
@@ -29,5 +24,4 @@ class DelayMiddleware extends Middleware
     {
         $this->clock->delay($this->secs);
     }
-
 }

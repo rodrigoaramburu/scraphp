@@ -35,17 +35,16 @@ final class Request
         return $this;
     }
 
-    public function body(array $body): self
-    {   
+    public function changeBody(array $body): self
+    {
         $this->body = $body;
         return $this;
     }
 
-    public function getBody(): array
+    public function body(): array
     {
         return $this->body;
     }
-
 
     public function url(): string
     {
@@ -56,7 +55,6 @@ final class Request
     {
         return $this->method;
     }
-
 
     public function failCount(): int
     {

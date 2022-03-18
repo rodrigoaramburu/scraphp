@@ -16,14 +16,16 @@ use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\Request;
 use ScraPHP\Response;
-use Symfony\Component\Process\Process;
+use ScraPHP\Util\Clock;
+use ScraPHP\Util\ClockInterface;
 
 final class HttpClientWebDriver implements HttpClientInterface
 {
-    private Process $process;
     private RemoteWebDriver $driver;
+    private int $waitTimeAfterRequestSec;
+    private ClockInterface $clock;
 
-    public function __construct(string $url = 'http://localhost:4444')
+    public function __construct(string $url = 'http://localhost:4444', int $waitTimeAfterRequestSec = 0)
     {
         $chromeOptions = new ChromeOptions();
         $chromeOptions->addArguments(['-headless']);
@@ -32,6 +34,8 @@ final class HttpClientWebDriver implements HttpClientInterface
         $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
         $this->driver = RemoteWebDriver::create($url, $desiredCapabilities);
+        $this->waitTimeAfterRequestSec = $waitTimeAfterRequestSec;
+        $this->clock = new Clock();
     }
 
     public function __destruct()
@@ -93,10 +97,15 @@ final class HttpClientWebDriver implements HttpClientInterface
         return $inputs;
     }
 
+    public function changeClock(ClockInterface $clock): void
+    {
+        $this->clock = $clock;
+    }
+
     private function get(Request $request): Response
     {
         $this->driver->get($request->url());
-
+        $this->clock->delay($this->waitTimeAfterRequestSec);
         return new Response(
             url: $request->url(),
             httpClient: $this,
@@ -108,7 +117,7 @@ final class HttpClientWebDriver implements HttpClientInterface
     {
         $this->driver->get('data:,');
 
-        $inputs = $this->jsInputFields($request->getBody());
+        $inputs = $this->jsInputFields($request->body());
 
         $script = <<<"JS"
             const form = document.createElement('form');
@@ -119,7 +128,7 @@ final class HttpClientWebDriver implements HttpClientInterface
             form.submit();
             JS;
         $this->driver->executeScript($script);
-
+        $this->clock->delay($this->waitTimeAfterRequestSec);
         return new Response(
             url: $request->url(),
             httpClient: $this,

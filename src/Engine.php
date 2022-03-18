@@ -26,7 +26,7 @@ final class Engine
         ?ClockInterface $clock = null
     ) {
         $this->httpClient = $httpClient ?? new HttpClient();
-        
+
         if ($looger === null) {
             $this->logger = new Logger('ScraPHP.Engine');
             $handler = new StreamHandler('php://stdout', Logger::DEBUG);
@@ -47,9 +47,11 @@ final class Engine
         return $this->scraps;
     }
 
-    public function useWebDriver(): self
+    public function useWebDriver(int $waitTimeAfterRequestSec = 0): self
     {
-        $this->httpClient = new HttpClientWebDriver();
+        $this->httpClient = new HttpClientWebDriver(
+            waitTimeAfterRequestSec: $waitTimeAfterRequestSec,
+        );
 
         return $this;
     }
@@ -72,7 +74,6 @@ final class Engine
     {
         while ($request = $scrap->nextRequest()) {
             try {
-                
                 $scrap->middlewareBeforeRequest($scrap, $request);
                 $response = $this->httpClient->access(request: $request);
                 $scrap->middlewareAfterRequest($scrap, $response);
