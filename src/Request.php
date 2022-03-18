@@ -10,13 +10,42 @@ final class Request
     public const POST = 'POST';
 
     private $failCount = 0;
+    private array $body = [];
 
-    public function __construct(
+    private function __construct(
         private string $url,
-        private string $method = Request::GET,
-        private array $data = [],
+        private string $method = Request::GET
     ) {
     }
+
+    public static function create(string $url): self
+    {
+        return new Request(url: $url, method: 'GET');
+    }
+
+    public function get(): self
+    {
+        $this->method = 'GET';
+        return $this;
+    }
+
+    public function post(): self
+    {
+        $this->method = 'POST';
+        return $this;
+    }
+
+    public function body(array $body): self
+    {   
+        $this->body = $body;
+        return $this;
+    }
+
+    public function getBody(): array
+    {
+        return $this->body;
+    }
+
 
     public function url(): string
     {
@@ -28,10 +57,6 @@ final class Request
         return $this->method;
     }
 
-    public function data(): array
-    {
-        return $this->data;
-    }
 
     public function failCount(): int
     {

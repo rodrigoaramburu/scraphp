@@ -9,9 +9,9 @@ use ScraPHP\Writers\WriterInterface;
 
 test('Deve permitir adicionar uma request e recupearar', function(){
 
-    $request1 = new Request(url: 'http://test1.com');
-    $request2 = new Request(url: 'http://test2.com');
-    $request3 = new Request(url: 'http://test3.com');
+    $request1 = Request::create(url: 'http://test1.com');
+    $request2 = Request::create(url: 'http://test2.com');
+    $request3 = Request::create(url: 'http://test3.com');
 
     $scrap = new class extends Scrap{
         public function parse(Response $response): Generator

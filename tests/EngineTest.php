@@ -49,7 +49,7 @@ test('deve processar um scrap', function(){
     $writer->expects( $this->exactly(2) )->method('data');
 
     $scrap = $this->createMock(Scrap::class);
-    $scrap->expects($this->exactly(2))->method('nextRequest')->willReturn( new Request(url: 'http://example.com'), null);
+    $scrap->expects($this->exactly(2))->method('nextRequest')->willReturn(Request::create(url: 'http://example.com'), null);
     $scrap->expects($this->once())->method('parse')->willReturn( arrayAsGenerator([ ['a'],['b']]));
     $scrap->expects($this->once())->method('writers')->willReturn([$writer]);
     
@@ -72,7 +72,7 @@ test('deve permitir usar httpwebdriver', function(){
 
 
 test('deve tentar novamente se request não encontrado', function(){
-    $request = new Request(url: 'http://example.com');
+    $request = Request::create(url: 'http://example.com');
 
     $scrap = new class extends Scrap{
         public function parse(Response $response): Generator{

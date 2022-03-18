@@ -83,7 +83,7 @@ final class HttpClient implements HttpClientInterface
     private function post(Request $request): Response
     {
         $result = $this->client->request('POST', $request->url(), [
-            'body' => $request->data(),
+            'body' => $request->getBody(),
         ]);
         $this->bodyHtml = $result->getContent();
         return new Response(

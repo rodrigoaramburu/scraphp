@@ -9,26 +9,11 @@ use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientElementInterface;
 use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
 
-$httpServerProcess = null;
-
-beforeAll( function() use(&$httpServerProcess, &$webDriverProcess){
-    $httpServerProcess = new Process(['php', '-S' ,'localhost:9666', '-t', 'tests/pages/']);
-    $httpServerProcess->start();
-
-   
-});
-
-afterAll(function() use(&$httpServerProcess, &$webDriverProcess) {
-    $httpServerProcess->stop();
-});
-
-
-
 test('deve acessar uma página e devolver um response', function(){
 
     $httpClient = new HttpClientWebDriver();
 
-    $response = $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $response = $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
 
     expect($response)
         ->toBeInstanceOf(Response::class)
@@ -40,7 +25,7 @@ test('deve acessar uma página e devolver um response', function(){
 test('deve recuperar um nó de texto de um elemento através de um seletor CSS', function(){
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $httpClient->access( Request::create(url: 'http://localhost:9666/page1.php'));
 
     expect($httpClient->css('h1')->text())->toBe('Titulo 1');
 });
@@ -49,7 +34,7 @@ test('deve recuperar um nó de texto de um elemento através de um seletor CSS',
 test('deve recuperar o valor de um atributo de um elemento através de um seletor CSS', function(){
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
 
     expect($httpClient->css('.teste')->attr('value'))->toBe('um teste');
 });
@@ -58,7 +43,7 @@ test('deve percorrer vários elementos através de um seletor', function(){
 
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
     
     $expectTexts = [];
 
@@ -73,7 +58,7 @@ test('deve percorrer vários elementos através de um seletor', function(){
 test('deve percorrer os elementos filhos ',function(){
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
     
     $expectTexts = [];
 
@@ -88,7 +73,7 @@ test('deve pegar o html dentro de um seletor', function(){
 
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
     
     expect(trim($httpClient->css('.html')->html()) )->toBe('<div>tag <strong>negrito</strong> outra</div>');
 });
@@ -97,7 +82,7 @@ test('deve pegar o html dentro de um seletor', function(){
 test('deve lancar exceção se não foi possível acessar a página',function(){
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:54321/page1.php'));
+    $httpClient->access(Request::create(url: 'http://localhost:54321/page1.php'));
     
 })->throws(HttpClientException::class, 'Erro ao acessar a página: ');
 
@@ -106,17 +91,17 @@ test('deve realizar uma requisição post', function(){
 
     $httpClient = new HttpClientWebDriver();
 
-    $request = new Request(
-        url: 'http://localhost:9666/post.php',
-        method: Request::POST,
-        data: [
-            'nome' => 'Joao',
-            'sobrenome' => 'Silva',
-            'email' => 'joaosilva@gmail.com',
-            'senha' => '123456'
-        ]
-    );
-
+    $request = Request::create(url: 'http://localhost:9666/post.php')
+            ->post()
+            ->body(
+                body: [
+                    'nome' => 'Joao',
+                    'sobrenome' => 'Silva',
+                    'email' => 'joaosilva@gmail.com',
+                    'senha' => '123456'
+                ]
+            );
+        
     $httpClient->access( $request );
 
     expect($httpClient->bodyHtml())
@@ -132,7 +117,7 @@ test('deve pegar o n elemento de um seletor', function(){
 
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
     
     expect($httpClient->css('.lista li:nth-child(3)')->text() )->toBe('Item 3');
 });
@@ -142,7 +127,7 @@ test('deve pegar permiter encadear filtro css', function(){
 
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
     
     expect($httpClient->css('.lista')->css('li:nth-child(3)')->text() )->toBe('Item 3');
 });
@@ -153,7 +138,7 @@ test('deve retornar null se o elemento não exitir', function(){
 
     $httpClient = new HttpClientWebDriver();
 
-    $httpClient->access( new Request(url: 'http://localhost:9666/page1.php'));
+    $httpClient->access(Request::create(url: 'http://localhost:9666/page1.php'));
     
     expect($httpClient->css('.nao-existe'))->toBeNull();
 
