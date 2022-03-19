@@ -1,11 +1,11 @@
 <?php
 
+use Mockery\Mock;
 use ScraPHP\Scrap;
 use ScraPHP\Engine;
 use ScraPHP\Request;
 use ScraPHP\Response;
-use ScraPHP\Util\Clock;
-use ScraPHP\Util\ClockInterface;
+use Psr\Log\LoggerInterface;
 use ScraPHP\Writers\WriterInterface;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
@@ -61,12 +61,8 @@ test('deve processar um scrap', function(){
 
 test('deve permitir usar httpwebdriver', function(){
     $engine = new Engine();
-    try{
-        $engine->useWebDriver();
-    }catch(Exception $e){
-        echo $e->getMessage();
-    }
-
+    $engine->useWebDriver();
+    
     expect($engine->httpClient())->toBeInstanceOf(HttpClientWebDriver::class);
 });
 
@@ -90,5 +86,32 @@ test('deve tentar novamente se request não encontrado', function(){
             ->start();
 
     expect($scrap->retry())->toBe(3);
+});
+
+
+test('deve logar o erro gerado pelo HttpClient', function(){
+    $request = Request::create(url: 'http://example.com');
+
+    $scrap = new class extends Scrap{
+        public function parse(Response $response): Generator{
+            yield [];
+        }
+    };
+
+    $scrap->addRequest($request);
+
+    $httpClient = $this->createMock(HttpClientInterface::class);
+    $httpClient->method('access')->with($request)->will($this->throwException(new HttpClientException('Mensagem de Teste')));
+    
+    /** @var LoggerInterface|Mock */
+    $loggerMock = Mockery::mock(LoggerInterface::class);
+    $loggerMock->shouldReceive('error')->times(3)->with("httpclient: Mensagem de Teste");
+    $loggerMock->shouldReceive('error')->once()->with('Não foi possível acessar:  http://example.com - 1 fails');
+    $loggerMock->shouldReceive('error')->once()->with('Não foi possível acessar:  http://example.com - 2 fails');
+    $loggerMock->shouldReceive('error')->once()->with('Não foi possível acessar:  http://example.com - 3 fails');
+
+    $engine = new Engine(httpClient: $httpClient, logger: $loggerMock);
+    $engine->scrap($scrap)
+            ->start();
 });
 

@@ -17,7 +17,8 @@
     },
     "require-dev": {
         "pestphp/pest": "^1.16",
-        "nunomaduro/phpinsights": "^2.0"
+        "nunomaduro/phpinsights": "^2.0",
+        "pestphp/pest-plugin-mock": "1.x-dev"
     },
     "require": {
         "php-webdriver/webdriver": "^1.11",
