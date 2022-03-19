@@ -8,15 +8,7 @@ Pequeno web scraper em PHP. Ainda em desenvolvimento inicial.
 
 # Adicionando no Projeto 
 ```
-"repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/rodrigoaramburu/scraphp"
-        }
-],
-"require": {
-    "rodrigoaramburu/scraphp": "dev-master"
-}
+composer require rodrigoaramburu/scraphp
 ```
 
 
