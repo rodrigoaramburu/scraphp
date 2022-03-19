@@ -3,6 +3,7 @@
     "type": "library",
     "license": "MIT",
     "description": "Biblioteca para raspagem de dados na web",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "rodrigoaramburu",
