@@ -17,11 +17,15 @@ final class Engine
 {
     private array $scraps;
 
+    /**
+     * @param array<string, string> $options do SymfonyHttpClient
+     */
     public function __construct(
         private ?HttpClientInterface $httpClient = null,
-        private ?LoggerInterface $logger = null
+        private ?LoggerInterface $logger = null,
+        private array $httpClientOptions = []
     ) {
-        $this->httpClient = $httpClient ?? new HttpClient();
+        $this->httpClient = $httpClient ?? new HttpClient($httpClientOptions);
 
         if ($logger === null) {
             $this->logger = new Logger('ScraPHP.Engine');
