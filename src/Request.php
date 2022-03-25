@@ -39,7 +39,7 @@ final class Request
         return $this;
     }
 
-    public function changeBody(array $body): self
+    public function body(array $body): self
     {
         $this->body = $body;
         return $this;
@@ -48,7 +48,7 @@ final class Request
     /**
      * @return array<string,string>
      */
-    public function body(): array
+    public function getBody(): array
     {
         return $this->body;
     }

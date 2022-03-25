@@ -86,7 +86,7 @@ test('deve lancar exceção se não foi possível acessar a página',function(){
 
     $httpClient->access( Request::create(url: 'http://localhost:54321/page1.php'));
     
-})->throws(HttpClientException::class, 'Erro ao acessar a página: ');
+})->throws(HttpClientException::class);
 
 
 test('deve realizar uma requisição post', function(){
@@ -95,7 +95,7 @@ test('deve realizar uma requisição post', function(){
 
     $request = Request::create(url: 'http://localhost:9666/post.php')
                 ->post()
-                ->changeBody(
+                ->body(
                     body: [
                         'nome' => 'Joao',
                         'sobrenome' => 'Silva',

@@ -119,7 +119,7 @@ final class HttpClientWebDriver implements HttpClientInterface
     {
         $this->driver->get('data:,');
 
-        $inputs = $this->jsInputFields($request->body());
+        $inputs = $this->jsInputFields($request->getBody());
 
         $script = <<<"JS"
             const form = document.createElement('form');

@@ -7,6 +7,7 @@ namespace ScraPHP;
 use Generator;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\HttpClient\Simple\HttpClient;
@@ -15,14 +16,16 @@ use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
 final class Engine
 {
     private array $scraps;
-    private HttpClientInterface $httpClient;
-    private Logger $logger;
 
+    /**
+     * @param array<string, string> $options do SymfonyHttpClient
+     */
     public function __construct(
-        ?HttpClientInterface $httpClient = null,
-        ?Logger $logger = null
+        private ?HttpClientInterface $httpClient = null,
+        private ?LoggerInterface $logger = null,
+        private array $httpClientOptions = []
     ) {
-        $this->httpClient = $httpClient ?? new HttpClient();
+        $this->httpClient = $httpClient ?? new HttpClient($httpClientOptions);
 
         if ($logger === null) {
             $this->logger = new Logger('ScraPHP.Engine');
@@ -81,6 +84,7 @@ final class Engine
             } catch (HttpClientException $e) {
                 $scrap->failRequest($request);
                 $this->logger->error("Não foi possível acessar:  {$request->url()} - {$request->failCount()} fails");
+                $this->logger->error("httpclient: {$e->getMessage()}");
             }
         }
     }

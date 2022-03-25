@@ -91,7 +91,7 @@ test('deve realizar uma requisição post', function(){
 
     $request = Request::create(url: 'http://localhost:9666/post.php')
             ->post()
-            ->changeBody(
+            ->body(
                 body: [
                     'nome' => 'Joao',
                     'sobrenome' => 'Silva',
