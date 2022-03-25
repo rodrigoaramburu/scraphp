@@ -59,7 +59,7 @@ test('deve processar um scrap', function(){
 
 });
 
-test('deve permitir usar httpwebdriver', function(){
+test('deve permitir usar webdriver', function(){
     $engine = new Engine();
     $engine->useWebDriver();
     
@@ -115,3 +115,27 @@ test('deve logar o erro gerado pelo HttpClient', function(){
             ->start();
 });
 
+
+test('deve receber a url do webdriver por parâmetro', function(){
+
+    
+
+    $engine = new Engine();
+    $engine->useWebDriver(webDriverUrl: 'http://localhost:5555');
+
+    $httpClient = $engine->httpClient();
+    $driver = getPrivateAttr($httpClient, 'driver');
+    $executor = getPrivateAttr($driver, 'executor');
+    $url = getPrivateAttr($executor, 'url');
+    
+    expect($url)->toBe('http://localhost:5555');
+});
+
+
+function getPrivateAttr(object $obj, string $attr): mixed
+{
+    $refClass = new ReflectionClass( $obj );
+    $attr = $refClass->getProperty($attr);
+    $attr->setAccessible(true);
+    return $attr->getValue($obj);
+}

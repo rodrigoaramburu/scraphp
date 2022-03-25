@@ -32,7 +32,7 @@ final class QuoteScrap extends Scrap
 }
 
 $engine = new Engine();
-//$engine->useWebDriver();
+$engine->useWebDriver(webDriverUrl: 'http://localhost:4444');
 
 $scrap = new QuoteScrap();
 
