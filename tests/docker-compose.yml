@@ -14,3 +14,9 @@ services:
     container_name: scraphp_test_selenium
     network_mode: "host"
 
+  selenium_5555: 
+    image: selenium/standalone-chrome:4.1.2-20220217
+    container_name: scraphp_test_selenium_port_5555
+    ports:
+      - '5555:4444'
+
