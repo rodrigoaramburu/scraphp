@@ -6,18 +6,19 @@ namespace ScraPHP\HttpClient\WebDriver;
 
 use Closure;
 use Exception;
-use Facebook\WebDriver\Chrome\ChromeOptions;
-use Facebook\WebDriver\Exception\NoSuchElementException;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Facebook\WebDriver\WebDriverBy;
-use ScraPHP\HttpClient\HttpClientElementInterface;
-use ScraPHP\HttpClient\HttpClientException;
-use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\Request;
 use ScraPHP\Response;
 use ScraPHP\Util\Clock;
+use ScraPHP\ResponseInterface;
 use ScraPHP\Util\ClockInterface;
+use Facebook\WebDriver\WebDriverBy;
+use ScraPHP\HttpClient\HttpClientException;
+use ScraPHP\HttpClient\HttpClientInterface;
+use Facebook\WebDriver\Chrome\ChromeOptions;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use ScraPHP\HttpClient\HttpClientElementInterface;
+use Facebook\WebDriver\Exception\NoSuchElementException;
 
 final class HttpClientWebDriver implements HttpClientInterface
 {
@@ -43,7 +44,7 @@ final class HttpClientWebDriver implements HttpClientInterface
         $this->driver->quit();
     }
 
-    public function access(Request $request): Response
+    public function access(Request $request): ResponseInterface
     {
         try {
             if ($request->method() === 'GET') {

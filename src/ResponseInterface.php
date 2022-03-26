@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace ScraPHP\HttpClient;
+namespace ScraPHP;
 
 use Closure;
-use ScraPHP\Request;
-use ScraPHP\ResponseInterface;
+use ScraPHP\HttpClient\HttpClientElementInterface;
+use ScraPHP\HttpClient\HttpClientInterface;
 
-interface HttpClientInterface
+interface ResponseInterface
 {
-    public function access(Request $request): ResponseInterface;
-
     public function bodyHtml(): string;
+
+    public function statusCode(): int;
 
     public function css(string $selector): ?HttpClientElementInterface;
 

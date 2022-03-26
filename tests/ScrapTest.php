@@ -5,6 +5,7 @@ declare(strict_types=1);
 use ScraPHP\Scrap;
 use ScraPHP\Request;
 use ScraPHP\Response;
+use ScraPHP\ResponseInterface;
 use ScraPHP\Writers\WriterInterface;
 
 test('Deve permitir adicionar uma request e recupearar', function(){
@@ -14,7 +15,7 @@ test('Deve permitir adicionar uma request e recupearar', function(){
     $request3 = Request::create(url: 'http://test3.com');
 
     $scrap = new class extends Scrap{
-        public function parse(Response $response): Generator
+        public function parse(ResponseInterface $response): Generator
         {
             yield []; 
         }
@@ -37,7 +38,7 @@ test('Deve permitir adicionar um writer e recupearar', function(){
     $writer1 = $this->createMock(WriterInterface::class);
     $writer2 = $this->createMock(WriterInterface::class);
     $scrap = new class extends Scrap{
-        public function parse(Response $response): Generator
+        public function parse(ResponseInterface $response): Generator
         {
             yield []; 
         }

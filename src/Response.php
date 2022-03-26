@@ -8,7 +8,7 @@ use Closure;
 use ScraPHP\HttpClient\HttpClientElementInterface;
 use ScraPHP\HttpClient\HttpClientInterface;
 
-final class Response
+final class Response implements ResponseInterface
 {
     public function __construct(
         private string $url,
