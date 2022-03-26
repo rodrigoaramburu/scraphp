@@ -6,13 +6,13 @@ namespace ScraPHP\HttpClient\Simple;
 
 use Closure;
 use Exception;
+use ScraPHP\HttpClient\HttpClientElementInterface;
+use ScraPHP\HttpClient\HttpClientException;
+use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\Request;
 use ScraPHP\Response;
 use ScraPHP\ResponseInterface;
 use Symfony\Component\DomCrawler\Crawler;
-use ScraPHP\HttpClient\HttpClientException;
-use ScraPHP\HttpClient\HttpClientInterface;
-use ScraPHP\HttpClient\HttpClientElementInterface;
 use Symfony\Component\HttpClient\HttpClient as SymfonyHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface as SymfonyHttpClientInterface;
 
@@ -31,13 +31,12 @@ final class HttpClient implements HttpClientInterface
         $this->bodyHtml = '';
 
         try {
-            if ($request->method() === 'GET') {
+            if ($request->isGet()) {
                 return $this->get($request);
             }
-            if ($request->method() === 'POST') {
+            if ($request->isPost()) {
                 return $this->post($request);
             }
-            return null;
         } catch (Exception $e) {
             throw new HttpClientException($e->getMessage());
         }

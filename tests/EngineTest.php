@@ -4,9 +4,9 @@ use Mockery\Mock;
 use ScraPHP\Scrap;
 use ScraPHP\Engine;
 use ScraPHP\Request;
-use ScraPHP\Response;
 use Psr\Log\LoggerInterface;
 use ScraPHP\ResponseInterface;
+use ScraPHP\Middleware\Middleware;
 use ScraPHP\Writers\WriterInterface;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
@@ -148,6 +148,41 @@ test('deve receber a url do webdriver por parâmetro', function(){
     
     expect($url)->toBe('http://localhost:5555');
 });
+
+
+
+test('deve chamar middlewares do scrap', function(){
+
+    /** @var Mock|ResponseInterface */
+    $response = Mockery::mock(ResponseInterface::class);
+
+    /** @var Mock|HttpClientInterface */
+    $httpClient = Mockery::mock(HttpClientInterface::class);
+    $httpClient->shouldReceive('access')->twice()->andReturn($response);
+    
+    $scrap = new class extends Scrap{
+        public function parse(ResponseInterface $response): Generator{
+            yield FROM [['a'],['b']];
+        }
+    };
+    $scrap->addRequest(Request::create(url: 'http://example.com'));
+    $scrap->addRequest(Request::create(url: 'http://example.com'));
+
+    /** @var Middleware|Mock */
+    $middleware = Mockery::mock(Middleware::class);
+    $middleware->shouldReceive('beforeAll')->once();
+    $middleware->shouldReceive('afterAll')->once();
+    $middleware->shouldReceive('beforeRequest')->twice();
+    $middleware->shouldReceive('afterRequest')->twice();
+    
+    $scrap->middleware($middleware);
+
+    
+    $engine = new Engine(httpClient: $httpClient);
+    $engine->scrap($scrap);
+    $engine->start();
+});
+
 
 
 function getPrivateAttr(object $obj, string $attr): mixed

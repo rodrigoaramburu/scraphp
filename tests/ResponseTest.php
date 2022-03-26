@@ -7,6 +7,21 @@ use ScraPHP\Response;
 use ScraPHP\HttpClient\HttpClientInterface;
 
 
+test('deve conter url, httpClient e statusCode', function(){
+
+    /** @var Mock|HttpClientInterface */
+    $httpClient = Mockery::mock(HttpClientInterface::class);
+
+    $response = new Response(
+        url: 'http://example.com',
+        httpClient: $httpClient,
+        statusCode: 200
+    );
+
+    expect($response->statusCode())->toBe(200);
+    expect($response->url())->toBe('http://example.com');
+});
+
 test('deve chamar filtro css do httpclient', function(){
 
     /** @var Mock|HttpClientInterface */

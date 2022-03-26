@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ScraPHP;
 
-use Facebook\WebDriver\WebDriver;
 use Generator;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -50,7 +49,7 @@ final class Engine
 
     public function useWebDriver(
         int $waitTimeAfterRequestSec = 0,
-        string  $webDriverUrl = "http://localhost:4444"
+        string $webDriverUrl = "http://localhost:4444"
     ): self
     {
         $this->httpClient = new HttpClientWebDriver(

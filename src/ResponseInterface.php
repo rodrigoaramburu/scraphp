@@ -6,7 +6,6 @@ namespace ScraPHP;
 
 use Closure;
 use ScraPHP\HttpClient\HttpClientElementInterface;
-use ScraPHP\HttpClient\HttpClientInterface;
 
 interface ResponseInterface
 {

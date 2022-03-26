@@ -22,6 +22,11 @@ final class Response implements ResponseInterface
         return $this->httpClient->bodyHtml();
     }
 
+    public function url(): string
+    {
+        return $this->url;
+    }
+
     public function statusCode(): int
     {
         return $this->statusCode;
