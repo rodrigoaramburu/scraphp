@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 use ScraPHP\Scrap;
 use ScraPHP\Request;
-use ScraPHP\Response;
 use ScraPHP\ResponseInterface;
 use ScraPHP\Writers\WriterInterface;
 
-test('Deve permitir adicionar uma request e recupearar', function(){
+test('deve permitir adicionar uma request e recupera-lo', function(){
 
     $request1 = Request::create(url: 'http://test1.com');
     $request2 = Request::create(url: 'http://test2.com');
@@ -33,10 +32,13 @@ test('Deve permitir adicionar uma request e recupearar', function(){
 });
 
 
-test('Deve permitir adicionar um writer e recupearar', function(){
+test('deve permitir adicionar um writer e recupera-lo', function(){
 
-    $writer1 = $this->createMock(WriterInterface::class);
-    $writer2 = $this->createMock(WriterInterface::class);
+    /** @var Mock|(WriterInterface */
+    $writer1 = Mockery::mock(WriterInterface::class);
+
+    /** @var Mock|(WriterInterface */
+    $writer2 = Mockery::mock(WriterInterface::class);
     $scrap = new class extends Scrap{
         public function parse(ResponseInterface $response): Generator
         {
@@ -47,7 +49,7 @@ test('Deve permitir adicionar um writer e recupearar', function(){
     $scrap->addWriter($writer1);
     $scrap->addWriter($writer2);
 
-    expect( count($scrap->writers() ) )->toBe(2);
+    expect( $scrap->writers() )->toHaveCount(2);
     expect($scrap->writers()[0] )->toBe($writer1);
     expect($scrap->writers()[1] )->toBe($writer2);
     
