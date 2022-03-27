@@ -6,19 +6,24 @@ namespace ScraPHP\Middleware;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use ScraPHP\Request;
-use ScraPHP\Response;
+use ScraPHP\ResponseInterface;
 use ScraPHP\Scrap;
 
 final class LogMiddleware extends Middleware
 {
-    private Logger $logger;
+    private LoggerInterface $logger;
 
-    public function __construct()
+    public function __construct(?LoggerInterface $logger = null)
     {
-        $this->logger = new Logger('ScraPHP.Engine');
-        $handler = new StreamHandler('php://stdout', Logger::DEBUG);
-        $this->logger->pushHandler($handler);
+        if($logger === null){
+            $this->logger = new Logger('ScraPHP.Engine');
+            $handler = new StreamHandler('php://stdout', Logger::DEBUG);
+            $this->logger->pushHandler($handler);
+        }else{
+            $this->logger = $logger;
+        }
     }
 
     public function beforeAll(Scrap $scrap): void
@@ -37,11 +42,11 @@ final class LogMiddleware extends Middleware
         $this->logger->info("{$scrapName} - Acessando: {$request->url()}...");
     }
 
-    public function afterRequest(Scrap $scrap, Response $response): void
+    public function afterRequest(Scrap $scrap, ResponseInterface $response): void
     {
         $scrapName = $scrap::class;
         $this
             ->logger
-            ->info("{$scrapName} - Status Code:{$response->statusCode()}");
+            ->info("{$scrapName} - Status Code: {$response->statusCode()}");
     }
 }

@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 include '../../vendor/autoload.php';
 
+use ScraPHP\Scrap;
 use ScraPHP\Engine;
-use ScraPHP\HttpClient\HttpClientElementInterface;
-use ScraPHP\Middleware\LogMiddleware;
 use ScraPHP\Request;
 use ScraPHP\Response;
-use ScraPHP\Scrap;
+use ScraPHP\ResponseInterface;
 use ScraPHP\Writers\JsonWriter;
+use ScraPHP\Middleware\LogMiddleware;
+use ScraPHP\Middleware\DelayMiddleware;
+use ScraPHP\HttpClient\HttpClientElementInterface;
 
 final class QuoteScrap extends Scrap
 {
-    public function parse(Response $response): Generator
+    public function parse(ResponseInterface $response): Generator
     {
         $data = $response->cssEach('.quote', static function (HttpClientElementInterface $element){
             return [
@@ -32,13 +34,13 @@ final class QuoteScrap extends Scrap
 }
 
 $engine = new Engine();
-$engine->useWebDriver(webDriverUrl: 'http://localhost:4444');
+//$engine->useWebDriver(webDriverUrl: 'http://localhost:4444');
 
 $scrap = new QuoteScrap();
 
-$scrap->addWriter(new JsonWriter('quotes.json'))
-    //->middleware( new DelayMiddleware(secs: 30))
-    ->middleware(new LogMiddleware())
+$scrap->withWriter(new JsonWriter('quotes.json'))
+    ->withMiddleware( new DelayMiddleware(secs: 30))
+    ->withMiddleware(new LogMiddleware())
     ->addRequest(Request::create(url: 'http://quotes.toscrape.com/page/1/'));
 
 $engine->scrap($scrap)

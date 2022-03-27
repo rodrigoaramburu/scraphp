@@ -6,25 +6,22 @@ namespace ScraPHP;
 
 final class Request
 {
-    public const GET = 'GET';
-    public const POST = 'POST';
-
     private $failCount = 0;
 
     /**
      * @var array<string,string>
      */
     private array $body = [];
+    private string $method = 'GET';
 
     private function __construct(
         private string $url,
-        private string $method = Request::GET
     ) {
     }
 
     public static function create(string $url): self
     {
-        return new Request(url: $url, method: 'GET');
+        return new Request(url: $url);
     }
 
     public function get(): self
@@ -39,7 +36,17 @@ final class Request
         return $this;
     }
 
-    public function body(array $body): self
+    public function isGet(): bool
+    {
+        return $this->method === 'GET';
+    }
+
+    public function isPost(): bool
+    {
+        return $this->method === 'POST';
+    }
+
+    public function withBody(array $body): self
     {
         $this->body = $body;
         return $this;
@@ -48,7 +55,7 @@ final class Request
     /**
      * @return array<string,string>
      */
-    public function getBody(): array
+    public function body(): array
     {
         return $this->body;
     }
@@ -56,11 +63,6 @@ final class Request
     public function url(): string
     {
         return $this->url;
-    }
-
-    public function method(): string
-    {
-        return $this->method;
     }
 
     public function failCount(): int

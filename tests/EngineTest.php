@@ -4,14 +4,15 @@ use Mockery\Mock;
 use ScraPHP\Scrap;
 use ScraPHP\Engine;
 use ScraPHP\Request;
-use ScraPHP\Response;
 use Psr\Log\LoggerInterface;
+use ScraPHP\ResponseInterface;
+use ScraPHP\Middleware\Middleware;
 use ScraPHP\Writers\WriterInterface;
 use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\HttpClient\WebDriver\HttpClientWebDriver;
 
-function arrayAsGenerator(array $array)
+function arrayAsGenerator(array $array): Generator
 {
     foreach ($array as $item) {
         yield $item;
@@ -19,18 +20,18 @@ function arrayAsGenerator(array $array)
 }
 
 
-test('deve adicionar um scrap', function(){
+test('deve adicionar scraps ao engine', function(){
 
     $engine = new Engine();
 
     $scrap1 = new class extends Scrap{
-        public function parse(Response $response): Generator{
+        public function parse(ResponseInterface $response): Generator{
             yield [];
         }
     };
 
     $scrap2 = new class extends Scrap{
-        public function parse(Response $response): Generator{
+        public function parse(ResponseInterface $response): Generator{
             yield [];
         }
     };
@@ -43,21 +44,34 @@ test('deve adicionar um scrap', function(){
 });
 
 
-test('deve processar um scrap', function(){
+test('deve processar parse dos scraps ao executar start', function(){
 
-    $writer =  $this->createMock(WriterInterface::class);
-    $writer->expects( $this->exactly(2) )->method('data');
-
-    $scrap = $this->createMock(Scrap::class);
-    $scrap->expects($this->exactly(2))->method('nextRequest')->willReturn(Request::create(url: 'http://example.com'), null);
-    $scrap->expects($this->once())->method('parse')->willReturn( arrayAsGenerator([ ['a'],['b']]));
-    $scrap->expects($this->once())->method('writers')->willReturn([$writer]);
+    /** @var WriterInterface|Mock */
+    $writer = Mockery::mock(WriterInterface::class);
+    $writer->shouldReceive('data')->once()->with(['a']);
+    $writer->shouldReceive('data')->once()->with(['b']);
     
-    $engine = new Engine();
+    $scrap = new class extends Scrap{
+        public function parse(ResponseInterface $response): Generator{
+            yield FROM [['a'],['b']];
+        }
+    };
+    $scrap->withWriter($writer);
+    $scrap->addRequest(Request::create(url: 'http://example.com'));
+    
+    /** @var Mock|ResponseInterface */
+    $response = Mockery::mock(ResponseInterface::class);
+
+    /** @var Mock|HttpClientInterface */
+    $httpClient = Mockery::mock(HttpClientInterface::class);
+    $httpClient->shouldReceive('access')->once()->andReturn($response);
+
+    $engine = new Engine(httpClient: $httpClient);
     $engine->scrap($scrap);
     $engine->start();
 
 });
+
 
 test('deve permitir usar webdriver', function(){
     $engine = new Engine();
@@ -67,21 +81,26 @@ test('deve permitir usar webdriver', function(){
 });
 
 
-test('deve tentar novamente se request não encontrado', function(){
+test('deve tentar novamente se a página do request não for encontrada', function(){
     $request = Request::create(url: 'http://example.com');
 
     $scrap = new class extends Scrap{
-        public function parse(Response $response): Generator{
+        public function parse(ResponseInterface $response): Generator{
             yield [];
         }
     };
 
     $scrap->addRequest($request);
 
-    $httpClient = $this->createMock(HttpClientInterface::class);
-    $httpClient->method('access')->with($request)->will($this->throwException(new HttpClientException()));
+    /** @var Mock|HttpClientInterface */
+    $httpClient = Mockery::mock(HttpClientInterface::class);
+    $httpClient->shouldReceive('access')->with($request)->andThrow(new HttpClientException());
     
-    $engine = new Engine(httpClient: $httpClient);
+    /** @var Mock|LoggerInterface */
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('error')->times(6);
+
+    $engine = new Engine(httpClient: $httpClient, logger: $logger);
     $engine->scrap($scrap)
             ->start();
 
@@ -93,15 +112,16 @@ test('deve logar o erro gerado pelo HttpClient', function(){
     $request = Request::create(url: 'http://example.com');
 
     $scrap = new class extends Scrap{
-        public function parse(Response $response): Generator{
+        public function parse(ResponseInterface $response): Generator{
             yield [];
         }
     };
 
     $scrap->addRequest($request);
 
-    $httpClient = $this->createMock(HttpClientInterface::class);
-    $httpClient->method('access')->with($request)->will($this->throwException(new HttpClientException('Mensagem de Teste')));
+    /** @var Mock|HttpClientInterface */
+    $httpClient = Mockery::mock(HttpClientInterface::class);
+    $httpClient->shouldReceive('access')->with($request)->andThrow(new HttpClientException('Mensagem de Teste'));
     
     /** @var LoggerInterface|Mock */
     $loggerMock = Mockery::mock(LoggerInterface::class);
@@ -118,8 +138,6 @@ test('deve logar o erro gerado pelo HttpClient', function(){
 
 test('deve receber a url do webdriver por parâmetro', function(){
 
-    
-
     $engine = new Engine();
     $engine->useWebDriver(webDriverUrl: 'http://localhost:5555');
 
@@ -130,6 +148,41 @@ test('deve receber a url do webdriver por parâmetro', function(){
     
     expect($url)->toBe('http://localhost:5555');
 });
+
+
+
+test('deve chamar middlewares do scrap', function(){
+
+    /** @var Mock|ResponseInterface */
+    $response = Mockery::mock(ResponseInterface::class);
+
+    /** @var Mock|HttpClientInterface */
+    $httpClient = Mockery::mock(HttpClientInterface::class);
+    $httpClient->shouldReceive('access')->twice()->andReturn($response);
+    
+    $scrap = new class extends Scrap{
+        public function parse(ResponseInterface $response): Generator{
+            yield FROM [['a'],['b']];
+        }
+    };
+    $scrap->addRequest(Request::create(url: 'http://example.com'));
+    $scrap->addRequest(Request::create(url: 'http://example.com'));
+
+    /** @var Middleware|Mock */
+    $middleware = Mockery::mock(Middleware::class);
+    $middleware->shouldReceive('beforeAll')->once();
+    $middleware->shouldReceive('afterAll')->once();
+    $middleware->shouldReceive('beforeRequest')->twice();
+    $middleware->shouldReceive('afterRequest')->twice();
+    
+    $scrap->withMiddleware($middleware);
+
+    
+    $engine = new Engine(httpClient: $httpClient);
+    $engine->scrap($scrap);
+    $engine->start();
+});
+
 
 
 function getPrivateAttr(object $obj, string $attr): mixed

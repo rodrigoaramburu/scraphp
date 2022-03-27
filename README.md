@@ -13,21 +13,21 @@ composer require rodrigoaramburu/scraphp
 ```
 ## Uso
 
-Para utilizar o ScraPHP primeiro se deve criar uma classe extendendo a classe *Scrap* e que sobreescreva o método *parse*. Este método recebe um objeto *Response* de parâmetro com a resposta do acesso a página desejada e possui alguns métodos para recupear as informações especificas através de seletores CSS. Utilizamos o *yield* para retornar os valores que selecionamos da página em forma de *array*. Este retorno será passado para um(ou mais) componente *Writer*, este componente tem a função de gravar de alguma forma os dados.
+Para utilizar o ScraPHP primeiro se deve criar uma classe extendendo a classe *Scrap* e que sobreescreva o método *parse*. Este método recebe um *ResponseInterface* de parâmetro com a resposta do acesso a página desejada e possui alguns métodos para recupear as informações especificas através de seletores CSS. Utilizamos o *yield* para retornar os valores que selecionamos da página em forma de *array*. Este retorno será passado para um(ou mais) componente *Writer*, este componente tem a função de gravar de alguma forma os dados.
 
 Tendo a classe *Scrap* criamos um objeto dela e chamamos o método *addRequest* que recebe um objeto *Request* que pode ser criado chamando o método *Request::create* passando a url desejada. Podemos adicionar várias requests. Por padrão o request será realizado via GET mas isto pode ser alterado chamando o método *post* do objeto de request e se necessário chamar o método *body* passando um *array* associativo como os inputs de um formulário.
 
-Também adicionamos o *Writer* desejado através do método *addWriter*. O Writer `JsonWriter` como o próprio nome já sugere, grava os dados retornados do método *parse* no formato *json* em um arquivo passado para ele no construtor. Pode-se criar seu próprio writer implementando a interface *WriterInterface*.
+Também adicionamos o *Writer* desejado através do método *withWriter*. O Writer `JsonWriter` como o próprio nome já sugere, grava os dados retornados do método *parse* no formato *json* em um arquivo passado para ele no construtor. Pode-se criar seu próprio writer implementando a interface *WriterInterface*.
 
-Pode-se adicionar *middlwares* que permiter executar ações no inicio e fim de todo o processo de scrap ou antes e depois de cada requisição a uma página. É aconselhável adicionar pelo menos o middleware de log(*LogMiddleware*). É possível criar seu proprio middleware estendendo a classe abstrata *Middleware*.
+Pode-se adicionar *middlwares* através do método *withMiddleware*. O middleware permite executar ações no inicio e fim de todo o processo de scrap ou antes e depois de cada requisição a uma página. É aconselhável adicionar pelo menos o middleware de log(*LogMiddleware*). É possível criar seu proprio middleware estendendo a classe abstrata *Middleware*.
 
-Por fim, cria-se um objeto da classe *Engine* e adiciona um ou mais scrap através do seu método *scrap* e chama-se o método *start* para iniciar o processamento.
+Por fim, cria-se um objeto da classe *Engine*, se adiciona um ou mais scrap através do método *scrap* do engine e em seguida chama-se o método *start* para iniciar o processamento.
 
 ### Um exemplo de uso
 ```
 final class QuoteScrap extends Scrap
 {
-    public function parse(Response $response): Generator
+    public function parse(ResponseInterface $response): Generator
     {
         $data = $response->cssEach('.quote', static function (HttpClientElementInterface $element){
             return [
@@ -45,13 +45,13 @@ final class QuoteScrap extends Scrap
 }
 
 $engine = new Engine();
-//$engine->useWebDriver();
+//$engine->useWebDriver(webDriverUrl: 'http://localhost:4444');
 
 $scrap = new QuoteScrap();
 
-$scrap->addWriter(new JsonWriter('quotes.json'))
-    //->middleware( new DelayMiddleware(secs: 30))
-    ->middleware(new LogMiddleware())
+$scrap->withWriter(new JsonWriter('quotes.json'))
+    ->withMiddleware( new DelayMiddleware(secs: 30))
+    ->withMiddleware(new LogMiddleware())
     ->addRequest(Request::create(url: 'http://quotes.toscrape.com/page/1/'));
 
 $engine->scrap($scrap)

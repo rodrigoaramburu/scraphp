@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace ScraPHP\Middleware;
 
+use ScraPHP\Scrap;
 use ScraPHP\Request;
 use ScraPHP\Response;
-use ScraPHP\Scrap;
+use ScraPHP\ResponseInterface;
 
 abstract class Middleware
 {
@@ -19,7 +20,7 @@ abstract class Middleware
     public function beforeRequest(Scrap $scrap, Request $request): void
     {
     }
-    public function afterRequest(Scrap $scrap, Response $response): void
+    public function afterRequest(Scrap $scrap, ResponseInterface $response): void
     {
     }
 }

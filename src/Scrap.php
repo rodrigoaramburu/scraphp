@@ -26,7 +26,7 @@ abstract class Scrap
      */
     private array $middlewares = [];
 
-    abstract public function parse(Response $response): Generator;
+    abstract public function parse(ResponseInterface $response): Generator;
 
     public function addRequest(Request $request): self
     {
@@ -39,7 +39,7 @@ abstract class Scrap
         return array_shift($this->requests);
     }
 
-    public function addWriter(WriterInterface $writer): self
+    public function withWriter(WriterInterface $writer): self
     {
         $this->writers[] = $writer;
         return $this;
@@ -66,7 +66,7 @@ abstract class Scrap
         }
     }
 
-    public function middleware(Middleware $middleware): self
+    public function withMiddleware(Middleware $middleware): self
     {
         $this->middlewares[] = $middleware;
         return $this;
@@ -101,7 +101,7 @@ abstract class Scrap
         }
     }
 
-    public function middlewareAfterRequest(Scrap $scrap, Response $response): void
+    public function middlewareAfterRequest(Scrap $scrap, ResponseInterface $response): void
     {
         foreach ($this->middlewares as $key => $middleware) {
             $middleware->afterRequest(scrap: $scrap, response: $response);

@@ -16,6 +16,7 @@ use ScraPHP\HttpClient\HttpClientException;
 use ScraPHP\HttpClient\HttpClientInterface;
 use ScraPHP\Request;
 use ScraPHP\Response;
+use ScraPHP\ResponseInterface;
 use ScraPHP\Util\Clock;
 use ScraPHP\Util\ClockInterface;
 
@@ -43,13 +44,13 @@ final class HttpClientWebDriver implements HttpClientInterface
         $this->driver->quit();
     }
 
-    public function access(Request $request): Response
+    public function access(Request $request): ResponseInterface
     {
         try {
-            if ($request->method() === 'GET') {
+            if ($request->isGet()) {
                 return $this->get($request);
             }
-            if ($request->method() === 'POST') {
+            if ($request->isPost()) {
                 return $this->post($request);
             }
         } catch (Exception $e) {
@@ -119,7 +120,7 @@ final class HttpClientWebDriver implements HttpClientInterface
     {
         $this->driver->get('data:,');
 
-        $inputs = $this->jsInputFields($request->getBody());
+        $inputs = $this->jsInputFields($request->body());
 
         $script = <<<"JS"
             const form = document.createElement('form');
