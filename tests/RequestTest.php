@@ -34,13 +34,13 @@ test('deve permiter adicionar o body', function(){
         'campo1' => 'valor1',
         'campo2' => 'valor2',
     ];
-    $request = Request::create(url: 'http://locahost/page1.php')->post()->body($data);
+    $request = Request::create(url: 'http://locahost/page1.php')->post()->withBody($data);
 
-    expect($request->getBody())->toBe($data);
+    expect($request->body())->toBe($data);
 });
 
 
-test('deve contar erros',function(){
+test('deve contar erros', function(){
 
     $request = Request::create(url: 'http://locahost/page1.php');
 

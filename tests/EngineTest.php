@@ -56,7 +56,7 @@ test('deve processar parse dos scraps ao executar start', function(){
             yield FROM [['a'],['b']];
         }
     };
-    $scrap->addWriter($writer);
+    $scrap->withWriter($writer);
     $scrap->addRequest(Request::create(url: 'http://example.com'));
     
     /** @var Mock|ResponseInterface */
@@ -175,7 +175,7 @@ test('deve chamar middlewares do scrap', function(){
     $middleware->shouldReceive('beforeRequest')->twice();
     $middleware->shouldReceive('afterRequest')->twice();
     
-    $scrap->middleware($middleware);
+    $scrap->withMiddleware($middleware);
 
     
     $engine = new Engine(httpClient: $httpClient);

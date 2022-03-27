@@ -46,7 +46,7 @@ final class Request
         return $this->method === 'POST';
     }
 
-    public function body(array $body): self
+    public function withBody(array $body): self
     {
         $this->body = $body;
         return $this;
@@ -55,7 +55,7 @@ final class Request
     /**
      * @return array<string,string>
      */
-    public function getBody(): array
+    public function body(): array
     {
         return $this->body;
     }

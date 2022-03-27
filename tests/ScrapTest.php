@@ -48,8 +48,8 @@ test('deve permitir adicionar um writer e recupera-lo', function(){
         }
     };
 
-    $scrap->addWriter($writer1);
-    $scrap->addWriter($writer2);
+    $scrap->withWriter($writer1);
+    $scrap->withWriter($writer2);
 
     expect( $scrap->writers() )->toHaveCount(2);
     expect($scrap->writers()[0] )->toBe($writer1);
@@ -72,8 +72,8 @@ test('deve permitir adicionar um middleware e recupera-lo', function(){
         }
     };
 
-    $scrap->middleware($middleware1);
-    $scrap->middleware($middleware2);
+    $scrap->withMiddleware($middleware1);
+    $scrap->withMiddleware($middleware2);
 
     expect( $scrap->middlewares() )->toHaveCount(2);
     expect($scrap->middlewares()[0] )->toBe($middleware1);
@@ -99,8 +99,8 @@ test('deve chamar beforeAll e afterAll de todos middlewares', function(){
      $middleware1->shouldReceive('afterAll')->once();
      $middleware2->shouldReceive('afterAll')->once();
 
-     $scrap->middleware($middleware1);
-     $scrap->middleware($middleware2);
+     $scrap->withMiddleware($middleware1);
+     $scrap->withMiddleware($middleware2);
 
      $scrap->middlewareBeforeAll();
      $scrap->middlewareAfterAll();
@@ -132,8 +132,8 @@ test('deve chamar beforeRequest e afterRequest de todos middlewares', function()
      $middleware1->shouldReceive('afterRequest')->once()->with($scrap, $response);
      $middleware2->shouldReceive('afterRequest')->once()->with($scrap, $response);
 
-     $scrap->middleware($middleware1);
-     $scrap->middleware($middleware2);
+     $scrap->withMiddleware($middleware1);
+     $scrap->withMiddleware($middleware2);
 
      $scrap->middlewareBeforeRequest($scrap, $request);
      $scrap->middlewareAfterRequest($scrap, $response);

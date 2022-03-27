@@ -39,7 +39,7 @@ abstract class Scrap
         return array_shift($this->requests);
     }
 
-    public function addWriter(WriterInterface $writer): self
+    public function withWriter(WriterInterface $writer): self
     {
         $this->writers[] = $writer;
         return $this;
@@ -66,7 +66,7 @@ abstract class Scrap
         }
     }
 
-    public function middleware(Middleware $middleware): self
+    public function withMiddleware(Middleware $middleware): self
     {
         $this->middlewares[] = $middleware;
         return $this;
