@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use ScraPHP\Page;
+use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\Exceptions\AssetNotFoundException;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
@@ -33,7 +34,7 @@ HTML);
 });
 
 
-test('featch an asset', function () {
+test('fetch an asset', function () {
 
     $guzzleClient = new GuzzleHttpClient();
 
@@ -47,3 +48,10 @@ test('throw exception if asset not found', function () {
 
     $content = $guzzleClient->fetchAsset('http://localhost:8000/not-found.txt');
 })->throws(AssetNotFoundException::class);
+
+
+test('throw exception if url not found', function () {
+    $guzzleClient = new GuzzleHttpClient();
+
+    $guzzleClient->get('http://localhost:8000/not-found.txt');
+})->throws(UrlNotFoundException::class);

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace ScraPHP;
 
 use Closure;
-use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 use Scraphp\HttpClient\HttpClient;
+use ScraPHP\Exceptions\UrlNotFoundException;
+use ScraPHP\Exceptions\AssetNotFoundException;
+use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
 final class ScraPHP
 {
@@ -22,7 +24,7 @@ final class ScraPHP
      *
      * @param  string  $url The URL to send the GET request to.
      * @param  callable  $callback The callback function to invoke with the response body.
-     *
+     * @throws UrlNotFoundException If the URL could not be found.
      * @return self Returns an instance of the current class.
      */
     public function go(string $url, Closure $callback): self
