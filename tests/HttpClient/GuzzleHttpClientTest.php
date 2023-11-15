@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 use ScraPHP\Page;
+use ScraPHP\Exceptions\AssetNotFoundException;
+use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
 test('retrive a webpage and return an object page', function () {
 
@@ -30,3 +31,19 @@ test('retrive a webpage and return an object page', function () {
 HTML);
 
 });
+
+
+test('featch an asset', function () {
+
+    $guzzleClient = new GuzzleHttpClient();
+
+    $content = $guzzleClient->fetchAsset('http://localhost:8000/texto.txt');
+
+    expect($content)->toBe('Hello World');
+});
+
+test('throw exception if asset not found', function () {
+    $guzzleClient = new GuzzleHttpClient();
+
+    $content = $guzzleClient->fetchAsset('http://localhost:8000/not-found.txt');
+})->throws(AssetNotFoundException::class);

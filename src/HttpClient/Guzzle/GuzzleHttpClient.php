@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\Guzzle;
 
-use ScraPHP\HttpClient\HttpClient;
 use ScraPHP\Page;
+use ScraPHP\HttpClient\HttpClient;
+use GuzzleHttp\Exception\ClientException;
+use ScraPHP\Exceptions\AssetNotFoundException;
 
 final class GuzzleHttpClient implements HttpClient
 {
@@ -28,5 +30,23 @@ final class GuzzleHttpClient implements HttpClient
             headers: $response->getHeaders(),
             httpClient: $this
         );
+    }
+
+    /**
+     * Fetches an asset from the given URL.
+     *
+     * @param string $url The URL of the asset.
+     * @throws AssetNotFoundException If the asset could not be found.
+     * @return string The contents of the asset.
+     */
+    public function fetchAsset(string $url): string
+    {
+        $client = new \GuzzleHttp\Client();
+        try {
+            $response = $client->request('GET', $url);
+        } catch(ClientException $e) {
+            throw new AssetNotFoundException($url . ' not found');
+        }
+        return $response->getBody()->getContents();
     }
 }

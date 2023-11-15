@@ -7,6 +7,15 @@ use Scraphp\HttpClient\HttpClient;
 use ScraPHP\Page;
 use ScraPHP\ScraPHP;
 
+afterEach(function () {
+    if(file_exists(__DIR__.'/assets/texto.txt')) {
+        unlink(__DIR__.'/assets/texto-saved.txt');
+    }
+    if(file_exists(__DIR__.'/assets/my-filename.txt')) {
+        unlink(__DIR__.'/assets/my-filename.txt');
+    }
+});
+
 test('go to a page and return the body', function () {
 
     $httpClient = Mockery::mock(HttpClient::class);
@@ -64,4 +73,60 @@ test('default http client should be GuzzleHttpClient', function () {
     $scraphp = new ScraPHP();
 
     expect($scraphp->httpClient())->toBeInstanceOf(GuzzleHttpClient::class);
+});
+
+
+test('call featch an asset from httpClient', function () {
+
+    $httpClient = Mockery::mock(HttpClient::class);
+
+    $httpClient->shouldReceive('fetchAsset')
+        ->once()
+        ->with('https://localhost:8000/texto.txt')
+        ->andReturn('Hello World');
+
+    $scraphp = new ScraPHP();
+    $scraphp->withHttpClient($httpClient);
+
+    $content = $scraphp->fetchAsset('https://localhost:8000/texto.txt');
+
+    expect($content)->toBe('Hello World');
+
+});
+
+
+test('call save asset with default filename', function () {
+
+    $httpClient = Mockery::mock(HttpClient::class);
+
+    $httpClient->shouldReceive('fetchAsset')
+        ->once()
+        ->with('https://localhost:8000/texto.txt')
+        ->andReturn('Hello World');
+
+    $scraphp = new ScraPHP();
+    $scraphp->withHttpClient($httpClient);
+
+    $file = $scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets');
+
+    expect($file)->toBeFile();
+    expect(file_get_contents($file))->toBe('Hello World');
+});
+
+test('call save asset with custom filename', function () {
+
+    $httpClient = Mockery::mock(HttpClient::class);
+
+    $httpClient->shouldReceive('fetchAsset')
+        ->once()
+        ->with('https://localhost:8000/texto.txt')
+        ->andReturn('Hello World');
+
+    $scraphp = new ScraPHP();
+    $scraphp->withHttpClient($httpClient);
+
+    $file = $scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets', 'my-filename.txt');
+
+    expect($file)->toBeFile();
+    expect(file_get_contents($file))->toBe('Hello World');
 });
