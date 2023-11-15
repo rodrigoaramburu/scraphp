@@ -9,7 +9,7 @@ use ScraPHP\ScraPHP;
 
 afterEach(function () {
     if(file_exists(__DIR__.'/assets/texto.txt')) {
-        unlink(__DIR__.'/assets/texto-saved.txt');
+        unlink(__DIR__.'/assets/texto.txt');
     }
     if(file_exists(__DIR__.'/assets/my-filename.txt')) {
         unlink(__DIR__.'/assets/my-filename.txt');
@@ -107,7 +107,7 @@ test('call save asset with default filename', function () {
     $scraphp = new ScraPHP();
     $scraphp->withHttpClient($httpClient);
 
-    $file = $scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets');
+    $file = $scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets/');
 
     expect($file)->toBeFile();
     expect(file_get_contents($file))->toBe('Hello World');
@@ -125,7 +125,7 @@ test('call save asset with custom filename', function () {
     $scraphp = new ScraPHP();
     $scraphp->withHttpClient($httpClient);
 
-    $file = $scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets', 'my-filename.txt');
+    $file = $scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets/', 'my-filename.txt');
 
     expect($file)->toBeFile();
     expect(file_get_contents($file))->toBe('Hello World');
