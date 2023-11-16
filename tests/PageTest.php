@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
+use Psr\Log\LoggerInterface;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 use ScraPHP\HttpClient\HtmlElement;
 use ScraPHP\Page;
 
-beforeEach(fn () => $this->httpClient = new GuzzleHttpClient());
+beforeEach(function () {
+    $this->logger = Mockery::mock(LoggerInterface::class);
+    $this->httpClient = new GuzzleHttpClient($this->logger);
+});
 
 test('filter elements by tag name', function () {
 

@@ -7,11 +7,17 @@ namespace ScraPHP\HttpClient\Guzzle;
 use ScraPHP\Page;
 use ScraPHP\HttpClient\HttpClient;
 use GuzzleHttp\Exception\ClientException;
+use Psr\Log\LoggerInterface;
 use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\Exceptions\AssetNotFoundException;
 
 final class GuzzleHttpClient implements HttpClient
 {
+    public function __construct(private LoggerInterface $logger)
+    {
+
+    }
+
     /**
      * Retrieves the contents of a web page using a GET request.
      *
@@ -23,9 +29,15 @@ final class GuzzleHttpClient implements HttpClient
     {
         $client = new \GuzzleHttp\Client();
         try {
+            $this->logger->debug('Accessing ' . $url);
             $response = $client->request('GET', $url);
+            $this->logger->debug('Status: '.$response->getStatusCode() . ' ' . $url);
         } catch(ClientException $e) {
-            throw new UrlNotFoundException($url . ' not found');
+            if($e->getCode() === 404) {
+                $this->logger->error('404 NOT FOUND ' . $url);
+                throw new UrlNotFoundException($url . ' not found');
+            }
+            throw $e;
         }
 
         return new Page(
@@ -48,10 +60,27 @@ final class GuzzleHttpClient implements HttpClient
     {
         $client = new \GuzzleHttp\Client();
         try {
+            $this->logger->debug('Fetching asset ' . $url);
             $response = $client->request('GET', $url);
+            $this->logger->debug('Status: '.$response->getStatusCode() . ' ' . $url);
         } catch(ClientException $e) {
-            throw new AssetNotFoundException($url . ' not found');
+            if($e->getCode() === 404) {
+                $this->logger->error('404 NOT FOUND ' . $url);
+                throw new AssetNotFoundException($url . ' not found');
+            }
+            throw $e;
         }
         return $response->getBody()->getContents();
+    }
+
+    public function withLogger(LoggerInterface $logger): self
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
+    public function logger(): LoggerInterface
+    {
+        return $this->logger;
     }
 }

@@ -2,25 +2,37 @@
 
 declare(strict_types=1);
 
-use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
-use Scraphp\HttpClient\HttpClient;
 use ScraPHP\Page;
 use ScraPHP\ScraPHP;
+use Psr\Log\LoggerInterface;
+use Scraphp\HttpClient\HttpClient;
+use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
+
+beforeEach(function () {
+    $this->httpClient = Mockery::mock(HttpClient::class);
+    $this->httpClient->shouldReceive('withLogger')->andReturn($this->httpClient);
+
+    $this->scraphp = new ScraPHP();
+    $this->scraphp->withHttpClient($this->httpClient);
+});
 
 afterEach(function () {
-    if(file_exists(__DIR__.'/assets/texto.txt')) {
-        unlink(__DIR__.'/assets/texto.txt');
-    }
-    if(file_exists(__DIR__.'/assets/my-filename.txt')) {
-        unlink(__DIR__.'/assets/my-filename.txt');
+
+    $files = [
+        __DIR__.'/assets/texto.txt',
+        __DIR__.'/assets/my-filename.txt',
+        __DIR__.'/assets/log.txt'
+    ];
+    foreach($files as $file) {
+        if(file_exists($file)) {
+            unlink($file);
+        }
     }
 });
 
 test('go to a page and return the body', function () {
 
-    $httpClient = Mockery::mock(HttpClient::class);
-
-    $httpClient->shouldReceive('get')
+    $this->httpClient->shouldReceive('get')
         ->once()
         ->with('https://localhost:8000/teste.html')
         ->andReturn(new Page(
@@ -28,13 +40,10 @@ test('go to a page and return the body', function () {
             statusCode: 200,
             headers: [],
             url: 'https://localhost:8000/teste.html',
-            httpClient: $httpClient
+            httpClient: $this->httpClient
         ));
 
-    $scraphp = new ScraPHP();
-    $scraphp->withHttpClient($httpClient);
-
-    $scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
+    $this->scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
         expect($page)->toBeInstanceOf(Page::class);
         expect($page->content())->toBe('<h1>Hello World</h1>');
         expect($page->statusCode())->toBe(200);
@@ -47,9 +56,7 @@ test('go to a page and return the body', function () {
 
 test('bind the context if the callback is a closure', function () {
 
-    $httpClient = Mockery::mock(HttpClient::class);
-
-    $httpClient->shouldReceive('get')
+    $this->httpClient->shouldReceive('get')
         ->once()
         ->with('https://localhost:8000/teste.html')
         ->andReturn(new Page(
@@ -57,13 +64,11 @@ test('bind the context if the callback is a closure', function () {
             statusCode: 200,
             headers: [],
             url: 'https://localhost:8000/teste.html',
-            httpClient: $httpClient
+            httpClient: $this->httpClient
         ));
 
-    $scraphp = new ScraPHP();
-    $scraphp->withHttpClient($httpClient);
 
-    $scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
+    $this->scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
         expect($this)->toBeInstanceOf(ScraPHP::class);
     });
 
@@ -71,24 +76,19 @@ test('bind the context if the callback is a closure', function () {
 
 test('default http client should be GuzzleHttpClient', function () {
     $scraphp = new ScraPHP();
-
     expect($scraphp->httpClient())->toBeInstanceOf(GuzzleHttpClient::class);
 });
 
 
 test('call featch an asset from httpClient', function () {
 
-    $httpClient = Mockery::mock(HttpClient::class);
-
-    $httpClient->shouldReceive('fetchAsset')
+    $this->httpClient->shouldReceive('fetchAsset')
         ->once()
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-    $scraphp = new ScraPHP();
-    $scraphp->withHttpClient($httpClient);
 
-    $content = $scraphp->fetchAsset('https://localhost:8000/texto.txt');
+    $content = $this->scraphp->fetchAsset('https://localhost:8000/texto.txt');
 
     expect($content)->toBe('Hello World');
 
@@ -97,17 +97,14 @@ test('call featch an asset from httpClient', function () {
 
 test('call save asset with default filename', function () {
 
-    $httpClient = Mockery::mock(HttpClient::class);
 
-    $httpClient->shouldReceive('fetchAsset')
+    $this->httpClient->shouldReceive('fetchAsset')
         ->once()
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-    $scraphp = new ScraPHP();
-    $scraphp->withHttpClient($httpClient);
 
-    $file = $scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets/');
+    $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets/');
 
     expect($file)->toBeFile();
     expect(file_get_contents($file))->toBe('Hello World');
@@ -115,18 +112,34 @@ test('call save asset with default filename', function () {
 
 test('call save asset with custom filename', function () {
 
-    $httpClient = Mockery::mock(HttpClient::class);
-
-    $httpClient->shouldReceive('fetchAsset')
+    $this->httpClient->shouldReceive('fetchAsset')
         ->once()
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-    $scraphp = new ScraPHP();
-    $scraphp->withHttpClient($httpClient);
-
-    $file = $scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets/', 'my-filename.txt');
+    $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets/', 'my-filename.txt');
 
     expect($file)->toBeFile();
     expect(file_get_contents($file))->toBe('Hello World');
+});
+
+
+test('inject a logger in the httpclient', function () {
+
+    $scraphp = new ScraPHP();
+
+    expect($scraphp->httpClient()->logger())->toBeInstanceOf(LoggerInterface::class);
+});
+
+
+test('log to a file', function () {
+    $scraphp = new ScraPHP([
+        'logger' => ['filename' => __DIR__.'/assets/log.txt']
+    ]);
+
+    $scraphp->logger()->debug('Teste');
+
+    expect(__DIR__.'/assets/log.txt')->toBeFile();
+    expect(file_get_contents(__DIR__.'/assets/log.txt'))->toContain('Teste');
+
 });

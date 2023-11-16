@@ -2,16 +2,25 @@
 
 declare(strict_types=1);
 
+use Psr\Log\LoggerInterface;
 use ScraPHP\Page;
 use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\Exceptions\AssetNotFoundException;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
+beforeEach(function () {
+
+    $this->logger = Mockery::mock(LoggerInterface::class);
+    $this->guzzleClient = new GuzzleHttpClient($this->logger);
+
+});
+
 test('retrive a webpage and return an object page', function () {
 
-    $guzzleClient = new GuzzleHttpClient();
+    $this->logger->shouldReceive('debug')->with('Accessing http://localhost:8000/hello-world.php');
+    $this->logger->shouldReceive('debug')->with('Status: 200 http://localhost:8000/hello-world.php');
 
-    $page = $guzzleClient->get('http://localhost:8000/hello-world.php');
+    $page = $this->guzzleClient->get('http://localhost:8000/hello-world.php');
 
     expect($page)->toBeInstanceOf(Page::class);
     expect($page->statusCode())->toBe(200);
@@ -36,22 +45,40 @@ HTML);
 
 test('fetch an asset', function () {
 
-    $guzzleClient = new GuzzleHttpClient();
+    $this->logger->shouldReceive('debug')->with('Fetching asset http://localhost:8000/texto.txt');
+    $this->logger->shouldReceive('debug')->with('Status: 200 http://localhost:8000/texto.txt');
 
-    $content = $guzzleClient->fetchAsset('http://localhost:8000/texto.txt');
+    $content = $this->guzzleClient->fetchAsset('http://localhost:8000/texto.txt');
 
     expect($content)->toBe('Hello World');
 });
 
 test('throw exception if asset not found', function () {
-    $guzzleClient = new GuzzleHttpClient();
 
-    $content = $guzzleClient->fetchAsset('http://localhost:8000/not-found.txt');
+    $this->logger->shouldReceive('debug')->with('Fetching asset http://localhost:8000/not-found.txt');
+
+    $this->logger->shouldReceive('error')->with('404 NOT FOUND http://localhost:8000/not-found.txt');
+
+    $this->guzzleClient->fetchAsset('http://localhost:8000/not-found.txt');
+
 })->throws(AssetNotFoundException::class);
 
 
 test('throw exception if url not found', function () {
-    $guzzleClient = new GuzzleHttpClient();
 
-    $guzzleClient->get('http://localhost:8000/not-found.txt');
+    $this->logger->shouldReceive('debug')->with('Accessing http://localhost:8000/not-found.php');
+
+    $this->logger->shouldReceive('error')->with('404 NOT FOUND http://localhost:8000/not-found.php');
+
+    $this->guzzleClient->get('http://localhost:8000/not-found.php');
+
 })->throws(UrlNotFoundException::class);
+
+
+test('with logger', function () {
+
+    $logger = Mockery::mock(LoggerInterface::class);
+    $this->guzzleClient->withLogger($logger);
+
+    expect($logger)->toBe($logger);
+});

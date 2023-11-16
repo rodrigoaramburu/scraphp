@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace ScraPHP;
 
 use Closure;
+use Monolog\Level;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 use Scraphp\HttpClient\HttpClient;
+use Monolog\Formatter\LineFormatter;
 use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\Exceptions\AssetNotFoundException;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
@@ -13,10 +17,25 @@ use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 final class ScraPHP
 {
     private HttpClient $httpClient;
+    private Logger $logger;
 
-    public function __construct()
+    /**
+     * Constructs a new instance of the class.
+     *
+     * @param array<string, array<string,string>> $config An array of configuration options.
+     *    - 'logger': (array) An array of configuration options for the logger.
+     *        - 'filename': (string) The filename of the log file. Defaults to 'php://stdout'.
+     *
+     * @throws Exception If an error occurs during initialization.
+     */
+    public function __construct(array $config = [])
     {
-        $this->httpClient = new GuzzleHttpClient();
+
+        $config['logger']['filename'] = $config['logger']['filename'] ?? 'php://stdout';
+
+        $this->initLogger($config['logger']['filename']);
+
+        $this->httpClient = new GuzzleHttpClient($this->logger);
     }
 
     /**
@@ -47,8 +66,7 @@ final class ScraPHP
      */
     public function withHttpClient(HttpClient $httpClient): self
     {
-        $this->httpClient = $httpClient;
-
+        $this->httpClient = $httpClient->withLogger($this->logger);
         return $this;
     }
 
@@ -94,4 +112,31 @@ final class ScraPHP
     {
         return $this->httpClient;
     }
+
+    /**
+     * Gets the logger object.
+     *
+     * @return Logger The logger object.
+     */
+    public function logger(): Logger
+    {
+        return $this->logger;
+    }
+
+    /**
+     * Initializes the logger.
+     *
+     * @param string $logfile The path to the log file.
+     * @throws Exception If there is an error initializing the logger.
+     */
+    private function initLogger(string $logfile): void
+    {
+        $this->logger = new Logger('SCRAPHP');
+        $handler = new StreamHandler($logfile, Level::Debug);
+        $formatter = new LineFormatter("%datetime% %level_name%  %message% %context% %extra%\n", 'Y-m-d H:i:s');
+        $handler->setFormatter($formatter);
+        $this->logger->pushHandler($handler);
+    }
+
+
 }
