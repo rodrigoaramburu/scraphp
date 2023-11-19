@@ -17,8 +17,8 @@ beforeEach(function () {
 
 test('retrive a webpage and return an object page', function () {
 
-    $this->logger->shouldReceive('debug')->with('Accessing http://localhost:8000/hello-world.php');
-    $this->logger->shouldReceive('debug')->with('Status: 200 http://localhost:8000/hello-world.php');
+    $this->logger->shouldReceive('info')->with('Accessing http://localhost:8000/hello-world.php');
+    $this->logger->shouldReceive('info')->with('Status: 200 http://localhost:8000/hello-world.php');
 
     $page = $this->guzzleClient->get('http://localhost:8000/hello-world.php');
 
@@ -44,8 +44,8 @@ HTML);
 
 test('fetch an asset', function () {
 
-    $this->logger->shouldReceive('debug')->with('Fetching asset http://localhost:8000/texto.txt');
-    $this->logger->shouldReceive('debug')->with('Status: 200 http://localhost:8000/texto.txt');
+    $this->logger->shouldReceive('info')->with('Fetching asset http://localhost:8000/texto.txt');
+    $this->logger->shouldReceive('info')->with('Status: 200 http://localhost:8000/texto.txt');
 
     $content = $this->guzzleClient->fetchAsset('http://localhost:8000/texto.txt');
 
@@ -54,7 +54,7 @@ test('fetch an asset', function () {
 
 test('throw exception if asset not found', function () {
 
-    $this->logger->shouldReceive('debug')->with('Fetching asset http://localhost:8000/not-found.txt');
+    $this->logger->shouldReceive('info')->with('Fetching asset http://localhost:8000/not-found.txt');
 
     $this->logger->shouldReceive('error')->with('404 NOT FOUND http://localhost:8000/not-found.txt');
 
@@ -64,7 +64,7 @@ test('throw exception if asset not found', function () {
 
 test('throw exception if url not found', function () {
 
-    $this->logger->shouldReceive('debug')->with('Accessing http://localhost:8000/not-found.php');
+    $this->logger->shouldReceive('info')->with('Accessing http://localhost:8000/not-found.php');
 
     $this->logger->shouldReceive('error')->with('404 NOT FOUND http://localhost:8000/not-found.php');
 

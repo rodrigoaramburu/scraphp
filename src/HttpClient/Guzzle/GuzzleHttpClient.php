@@ -30,9 +30,9 @@ final class GuzzleHttpClient implements HttpClient
     {
         $client = new \GuzzleHttp\Client();
         try {
-            $this->logger->debug('Accessing '.$url);
+            $this->logger->info('Accessing '.$url);
             $response = $client->request('GET', $url);
-            $this->logger->debug('Status: '.$response->getStatusCode().' '.$url);
+            $this->logger->info('Status: '.$response->getStatusCode().' '.$url);
         } catch (ClientException $e) {
             if ($e->getCode() === 404) {
                 $this->logger->error('404 NOT FOUND '.$url);
@@ -62,9 +62,9 @@ final class GuzzleHttpClient implements HttpClient
     {
         $client = new \GuzzleHttp\Client();
         try {
-            $this->logger->debug('Fetching asset '.$url);
+            $this->logger->info('Fetching asset '.$url);
             $response = $client->request('GET', $url);
-            $this->logger->debug('Status: '.$response->getStatusCode().' '.$url);
+            $this->logger->info('Status: '.$response->getStatusCode().' '.$url);
         } catch (ClientException $e) {
             if ($e->getCode() === 404) {
                 $this->logger->error('404 NOT FOUND '.$url);
