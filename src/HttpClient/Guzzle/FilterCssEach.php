@@ -11,9 +11,8 @@ trait FilterCssEach
     /**
      * Filters the elements in the HTML content using a CSS selector and applies a callback function to each element.
      *
-     * @param string $cssSelector The CSS selector used to filter the elements.
-     * @param callable $callback The callback function to process to each filtered element.
-     *
+     * @param  string  $cssSelector The CSS selector used to filter the elements.
+     * @param  callable  $callback The callback function to process to each filtered element.
      * @return array<string> An array containing the results of processing the callback function to each filtered element.
      */
     public function filterCSSEach(string $cssSelector, callable $callback): array

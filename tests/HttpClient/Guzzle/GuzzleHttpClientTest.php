@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use Psr\Log\LoggerInterface;
-use ScraPHP\Page;
-use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\Exceptions\AssetNotFoundException;
+use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
+use ScraPHP\Page;
 
 beforeEach(function () {
 
@@ -42,7 +42,6 @@ HTML);
 
 });
 
-
 test('fetch an asset', function () {
 
     $this->logger->shouldReceive('debug')->with('Fetching asset http://localhost:8000/texto.txt');
@@ -63,7 +62,6 @@ test('throw exception if asset not found', function () {
 
 })->throws(AssetNotFoundException::class);
 
-
 test('throw exception if url not found', function () {
 
     $this->logger->shouldReceive('debug')->with('Accessing http://localhost:8000/not-found.php');
@@ -73,7 +71,6 @@ test('throw exception if url not found', function () {
     $this->guzzleClient->get('http://localhost:8000/not-found.php');
 
 })->throws(UrlNotFoundException::class);
-
 
 test('with logger', function () {
 

@@ -12,8 +12,7 @@ trait FilterCSS
     /**
      * Filters the HTML content using a CSS selector and returns a single matching element.
      *
-     * @param string $cssSelector The CSS selector used to filter the HTML content.
-     *
+     * @param  string  $cssSelector The CSS selector used to filter the HTML content.
      * @return \HtmlElement|null The filtered HTML element or null if no matching element is found.
      */
     public function filterCSS(string $cssSelector): ?HtmlElement

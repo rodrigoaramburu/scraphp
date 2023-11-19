@@ -74,7 +74,6 @@ final class Page
      * Retrieves the array of values associated with the given header.
      *
      * @param  string  $header the name of the header to retrieve values for
-     *
      * @return array<string> the array of values associated with the given header, or an empty array if the header does not exist
      */
     public function header(string $header): array

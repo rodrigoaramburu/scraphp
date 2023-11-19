@@ -1,13 +1,12 @@
 <?php
 
-
+use ScraPHP\HttpClient\Guzzle\GuzzleHtmlElement;
 use ScraPHP\HttpClient\HtmlElement;
 use Symfony\Component\DomCrawler\Crawler;
-use ScraPHP\HttpClient\Guzzle\GuzzleHtmlElement;
 
 test('return text of element', function () {
 
-    $html = <<<HTML
+    $html = <<<'HTML'
     <html>
         <body>
             <h1>Hello World</h1>
@@ -24,7 +23,7 @@ test('return text of element', function () {
 
 test('return an attribute of element', function () {
 
-    $html = <<<HTML
+    $html = <<<'HTML'
     <html>
         <body>
             <h1>Hello World</h1>
@@ -40,10 +39,9 @@ test('return an attribute of element', function () {
     expect($href)->toBe('https://www.google.com');
 });
 
-
 test('return null if element not found', function () {
 
-    $html = <<<HTML
+    $html = <<<'HTML'
     <html>
         <body>
             <h1>Hello World</h1>
@@ -58,10 +56,9 @@ test('return null if element not found', function () {
     expect($elementFiltered)->toBeNull();
 });
 
-
 test('iterate over elements', function () {
 
-    $html = <<<HTML
+    $html = <<<'HTML'
     <html>
         <body>
             <h1>Hello World</h1>
@@ -77,8 +74,8 @@ test('iterate over elements', function () {
     $element = new GuzzleHtmlElement(new Crawler($html));
 
     $result = $element->filterCSSEach('ul li', function (HtmlElement $element, int $i) {
-        return $element->text('href') . ' - ' . $i;
+        return $element->text('href').' - '.$i;
     });
 
-    expect($result)->toBe(['Item 1 - 0','Item 2 - 1','Item 3 - 2',]);
+    expect($result)->toBe(['Item 1 - 0', 'Item 2 - 1', 'Item 3 - 2']);
 });

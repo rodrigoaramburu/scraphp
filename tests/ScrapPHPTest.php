@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
+use Psr\Log\LoggerInterface;
+use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
+use Scraphp\HttpClient\HttpClient;
 use ScraPHP\Page;
 use ScraPHP\ScraPHP;
-use Psr\Log\LoggerInterface;
-use Scraphp\HttpClient\HttpClient;
-use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
+use ScraPHP\Writers\JsonWriter;
 
 beforeEach(function () {
     $this->httpClient = Mockery::mock(HttpClient::class);
@@ -21,10 +22,10 @@ afterEach(function () {
     $files = [
         __DIR__.'/assets/texto.txt',
         __DIR__.'/assets/my-filename.txt',
-        __DIR__.'/assets/log.txt'
+        __DIR__.'/assets/log.txt',
     ];
-    foreach($files as $file) {
-        if(file_exists($file)) {
+    foreach ($files as $file) {
+        if (file_exists($file)) {
             unlink($file);
         }
     }
@@ -67,7 +68,6 @@ test('bind the context if the callback is a closure', function () {
             httpClient: $this->httpClient
         ));
 
-
     $this->scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
         expect($this)->toBeInstanceOf(ScraPHP::class);
     });
@@ -79,7 +79,6 @@ test('default http client should be GuzzleHttpClient', function () {
     expect($scraphp->httpClient())->toBeInstanceOf(GuzzleHttpClient::class);
 });
 
-
 test('call featch an asset from httpClient', function () {
 
     $this->httpClient->shouldReceive('fetchAsset')
@@ -87,24 +86,20 @@ test('call featch an asset from httpClient', function () {
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-
     $content = $this->scraphp->fetchAsset('https://localhost:8000/texto.txt');
 
     expect($content)->toBe('Hello World');
 
 });
 
-
 test('call save asset with default filename', function () {
-
 
     $this->httpClient->shouldReceive('fetchAsset')
         ->once()
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-
-    $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets/');
+    $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__.'/assets/');
 
     expect($file)->toBeFile();
     expect(file_get_contents($file))->toBe('Hello World');
@@ -117,12 +112,11 @@ test('call save asset with custom filename', function () {
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-    $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__ . '/assets/', 'my-filename.txt');
+    $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__.'/assets/', 'my-filename.txt');
 
     expect($file)->toBeFile();
     expect(file_get_contents($file))->toBe('Hello World');
 });
-
 
 test('inject a logger in the httpclient', function () {
 
@@ -131,10 +125,9 @@ test('inject a logger in the httpclient', function () {
     expect($scraphp->httpClient()->logger())->toBeInstanceOf(LoggerInterface::class);
 });
 
-
 test('log to a file', function () {
     $scraphp = new ScraPHP([
-        'logger' => ['filename' => __DIR__.'/assets/log.txt']
+        'logger' => ['filename' => __DIR__.'/assets/log.txt'],
     ]);
 
     $scraphp->logger()->debug('Teste');
@@ -142,4 +135,13 @@ test('log to a file', function () {
     expect(__DIR__.'/assets/log.txt')->toBeFile();
     expect(file_get_contents(__DIR__.'/assets/log.txt'))->toContain('Teste');
 
+});
+
+test('inject the logger into the writer', function () {
+
+    $scraphp = new ScraPHP();
+
+    $scraphp->withWriter(new JsonWriter(__DIR__.'/assets/log.txt'));
+
+    expect($scraphp->writer()->logger())->toBeInstanceOf(LoggerInterface::class);
 });

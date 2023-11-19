@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\Guzzle;
 
-use ScraPHP\Page;
-use ScraPHP\HttpClient\HttpClient;
 use GuzzleHttp\Exception\ClientException;
 use Psr\Log\LoggerInterface;
-use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\Exceptions\AssetNotFoundException;
+use ScraPHP\Exceptions\UrlNotFoundException;
+use ScraPHP\HttpClient\HttpClient;
+use ScraPHP\Page;
 
 final class GuzzleHttpClient implements HttpClient
 {
@@ -22,20 +22,21 @@ final class GuzzleHttpClient implements HttpClient
      * Retrieves the contents of a web page using a GET request.
      *
      * @param  string  $url The URL of the web page to retrieve.
-     * @throws UrlNotFoundException If the URL could not be found.
      * @return Page The retrieved web page.
+     *
+     * @throws UrlNotFoundException If the URL could not be found.
      */
     public function get(string $url): Page
     {
         $client = new \GuzzleHttp\Client();
         try {
-            $this->logger->debug('Accessing ' . $url);
+            $this->logger->debug('Accessing '.$url);
             $response = $client->request('GET', $url);
-            $this->logger->debug('Status: '.$response->getStatusCode() . ' ' . $url);
-        } catch(ClientException $e) {
-            if($e->getCode() === 404) {
-                $this->logger->error('404 NOT FOUND ' . $url);
-                throw new UrlNotFoundException($url . ' not found');
+            $this->logger->debug('Status: '.$response->getStatusCode().' '.$url);
+        } catch (ClientException $e) {
+            if ($e->getCode() === 404) {
+                $this->logger->error('404 NOT FOUND '.$url);
+                throw new UrlNotFoundException($url.' not found');
             }
             throw $e;
         }
@@ -52,30 +53,33 @@ final class GuzzleHttpClient implements HttpClient
     /**
      * Fetches an asset from the given URL.
      *
-     * @param string $url The URL of the asset.
-     * @throws AssetNotFoundException If the asset could not be found.
+     * @param  string  $url The URL of the asset.
      * @return string The contents of the asset.
+     *
+     * @throws AssetNotFoundException If the asset could not be found.
      */
     public function fetchAsset(string $url): string
     {
         $client = new \GuzzleHttp\Client();
         try {
-            $this->logger->debug('Fetching asset ' . $url);
+            $this->logger->debug('Fetching asset '.$url);
             $response = $client->request('GET', $url);
-            $this->logger->debug('Status: '.$response->getStatusCode() . ' ' . $url);
-        } catch(ClientException $e) {
-            if($e->getCode() === 404) {
-                $this->logger->error('404 NOT FOUND ' . $url);
-                throw new AssetNotFoundException($url . ' not found');
+            $this->logger->debug('Status: '.$response->getStatusCode().' '.$url);
+        } catch (ClientException $e) {
+            if ($e->getCode() === 404) {
+                $this->logger->error('404 NOT FOUND '.$url);
+                throw new AssetNotFoundException($url.' not found');
             }
             throw $e;
         }
+
         return $response->getBody()->getContents();
     }
 
     public function withLogger(LoggerInterface $logger): self
     {
         $this->logger = $logger;
+
         return $this;
     }
 

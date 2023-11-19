@@ -29,12 +29,11 @@ final class GuzzleHtmlElement implements HtmlElement
     /**
      * Gets the value of the specified attribute of element.
      *
-     * @param string $attr The name of the attribute to get.
+     * @param  string  $attr The name of the attribute to get.
      * @return string|null The value of the specified attribute, or null if it does not exist.
      */
     public function attr(string $attr): ?string
     {
         return $this->crawler->attr($attr);
     }
-
 }
