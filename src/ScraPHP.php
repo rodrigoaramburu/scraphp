@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace ScraPHP;
 
 use Closure;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
-use ScraPHP\Exceptions\AssetNotFoundException;
-use ScraPHP\Exceptions\UrlNotFoundException;
-use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
-use Scraphp\HttpClient\HttpClient;
 use ScraPHP\Writers\Writer;
+use Monolog\Handler\StreamHandler;
+use Scraphp\HttpClient\HttpClient;
+use Monolog\Formatter\LineFormatter;
+use ScraPHP\Exceptions\UrlNotFoundException;
+use ScraPHP\Exceptions\AssetNotFoundException;
+use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
 final class ScraPHP
 {
@@ -46,19 +46,23 @@ final class ScraPHP
      * Executes a GET request to the specified URL and invokes the provided callback function with the page object.
      *
      * @param  string  $url The URL to send the GET request to.
-     * @param  callable  $callback The callback function to invoke with the response body.
+     * @param  callable|ProcessPage  $callback The callback function or class ProcessPage to invoke with the response body.
      * @return self Returns an instance of the current class.
      *
      * @throws UrlNotFoundException If the URL could not be found.
      */
-    public function go(string $url, Closure $callback): self
+    public function go(string $url, Closure|ProcessPage $callback): self
     {
         $page = $this->httpClient->get($url);
         if ($callback instanceof Closure) {
             $callback = \Closure::bind($callback, $this, ScraPHP::class);
+            $callback($page);
+        }
+        if ($callback instanceof ProcessPage) {
+            $callback->withScraPHP($this);
+            $callback->process($page);
         }
 
-        $callback($page);
 
         return $this;
     }
@@ -71,11 +75,18 @@ final class ScraPHP
      */
     public function withHttpClient(HttpClient $httpClient): self
     {
-        $this->httpClient = $httpClient->withLogger($this->logger);
+        $this->httpClient = $httpClient;
+        $httpClient->withLogger($this->logger);
 
         return $this;
     }
 
+    /**
+     * Sets the writer for the object and returns the object itself.
+     *
+     * @param Writer $writer The writer object to set.
+     * @return self The updated object with the new writer.
+     */
     public function withWriter(Writer $writer): self
     {
         $this->writer = $writer;
@@ -84,6 +95,11 @@ final class ScraPHP
         return $this;
     }
 
+    /**
+     * Gets the writer object.
+     *
+     * @return Writer The writer object.
+     */
     public function writer(): Writer
     {
         return $this->writer;

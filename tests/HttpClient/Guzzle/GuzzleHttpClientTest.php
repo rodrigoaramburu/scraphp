@@ -71,11 +71,3 @@ test('throw exception if url not found', function () {
     $this->guzzleClient->get('http://localhost:8000/not-found.php');
 
 })->throws(UrlNotFoundException::class);
-
-test('with logger', function () {
-
-    $logger = Mockery::mock(LoggerInterface::class);
-    $this->guzzleClient->withLogger($logger);
-
-    expect($logger)->toBe($logger);
-});

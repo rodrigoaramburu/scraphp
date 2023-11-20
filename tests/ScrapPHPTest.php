@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-use Psr\Log\LoggerInterface;
-use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
-use Scraphp\HttpClient\HttpClient;
 use ScraPHP\Page;
 use ScraPHP\ScraPHP;
+use ScraPHP\ProcessPage;
+use Psr\Log\LoggerInterface;
 use ScraPHP\Writers\JsonWriter;
+use Scraphp\HttpClient\HttpClient;
+use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
 beforeEach(function () {
     $this->httpClient = Mockery::mock(HttpClient::class);
@@ -79,7 +80,7 @@ test('default http client should be GuzzleHttpClient', function () {
     expect($scraphp->httpClient())->toBeInstanceOf(GuzzleHttpClient::class);
 });
 
-test('call featch an asset from httpClient', function () {
+test('call fetch an asset from httpClient', function () {
 
     $this->httpClient->shouldReceive('fetchAsset')
         ->once()
@@ -118,13 +119,6 @@ test('call save asset with custom filename', function () {
     expect(file_get_contents($file))->toBe('Hello World');
 });
 
-test('inject a logger in the httpclient', function () {
-
-    $scraphp = new ScraPHP();
-
-    expect($scraphp->httpClient()->logger())->toBeInstanceOf(LoggerInterface::class);
-});
-
 test('log to a file', function () {
     $scraphp = new ScraPHP([
         'logger' => ['filename' => __DIR__.'/assets/log.txt'],
@@ -144,4 +138,28 @@ test('inject the logger into the writer', function () {
     $scraphp->withWriter(new JsonWriter(__DIR__.'/assets/log.txt'));
 
     expect($scraphp->writer()->logger())->toBeInstanceOf(LoggerInterface::class);
+});
+
+
+test('call class ProcessPage', function () {
+
+    $httpClient = Mockery::mock(HttpClient::class);
+    $httpClient->shouldReceive('get')->andReturn(new Page(
+        content: '<h1>Hello World</h1>',
+        statusCode: 200,
+        headers: [],
+        url: 'https://localhost:8000/teste.html',
+        httpClient: $httpClient
+    ));
+    $httpClient->shouldReceive('withLogger')->once();
+    $scraphp = new ScraPHP();
+    $scraphp->withHttpClient($httpClient);
+
+
+    $pp =  Mockery::mock(ProcessPage::class);
+    $pp->shouldReceive('withScraPHP')->once()->with($scraphp);
+    $pp->shouldReceive('process')->once();
+
+    $scraphp->go('https://localhost:8000/teste.html', $pp);
+
 });

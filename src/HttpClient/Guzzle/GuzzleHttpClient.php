@@ -13,6 +13,11 @@ use ScraPHP\Page;
 
 final class GuzzleHttpClient implements HttpClient
 {
+    /**
+     * Constructor for the class.
+     *
+     * @param LoggerInterface $logger The logger instance.
+     */
     public function __construct(private LoggerInterface $logger)
     {
 
@@ -76,15 +81,4 @@ final class GuzzleHttpClient implements HttpClient
         return $response->getBody()->getContents();
     }
 
-    public function withLogger(LoggerInterface $logger): self
-    {
-        $this->logger = $logger;
-
-        return $this;
-    }
-
-    public function logger(): LoggerInterface
-    {
-        return $this->logger;
-    }
 }
