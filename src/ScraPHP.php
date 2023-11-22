@@ -11,17 +11,24 @@ use ScraPHP\Writers\Writer;
 use Monolog\Handler\StreamHandler;
 use Scraphp\HttpClient\HttpClient;
 use Monolog\Formatter\LineFormatter;
+use Psr\Log\LoggerInterface;
 use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\Exceptions\AssetNotFoundException;
+use ScraPHP\Exceptions\HttpClientException;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
 final class ScraPHP
 {
     private HttpClient $httpClient;
 
-    private Logger $logger;
+    private LoggerInterface $logger;
 
     private Writer $writer;
+
+    private array $urlErrors = [];
+    private array $assetErrors = [];
+
+    private array $config;
 
     /**
      * Constructs a new instance of the class.
@@ -29,6 +36,9 @@ final class ScraPHP
      * @param  array<string, array<string,string>>  $config An array of configuration options.
      *    - 'logger': (array) An array of configuration options for the logger.
      *        - 'filename': (string) The filename of the log file. Defaults to 'php://stdout'.
+     *    - 'httpclient': (array) An array of configuration options for the HTTP client.
+     *        - 'retry_count': (int) The number of times to retry a failed request. Defaults to 3.
+     *        - 'retry_time': (int) The number of seconds to wait between retries. Defaults to 30.
      *
      * @throws Exception If an error occurs during initialization.
      */
@@ -36,6 +46,11 @@ final class ScraPHP
     {
 
         $config['logger']['filename'] = $config['logger']['filename'] ?? 'php://stdout';
+
+        $config['httpclient']['retry_count'] = $config['httpclient']['retry_count'] ?? 3;
+        $config['httpclient']['retry_time'] = $config['httpclient']['retry_time'] ?? 30;
+
+        $this->config = $config;
 
         $this->initLogger($config['logger']['filename']);
 
@@ -53,18 +68,51 @@ final class ScraPHP
      */
     public function go(string $url, Closure|ProcessPage $callback): self
     {
-        $page = $this->httpClient->get($url);
-        if ($callback instanceof Closure) {
-            $callback = \Closure::bind($callback, $this, ScraPHP::class);
-            $callback($page);
-        }
-        if ($callback instanceof ProcessPage) {
-            $callback->withScraPHP($this);
-            $callback->process($page);
+        try {
+            $page = $this->tryGetPage($url);
+
+            if ($callback instanceof Closure) {
+                $callback = \Closure::bind($callback, $this, ScraPHP::class);
+                $callback($page);
+            }
+            if ($callback instanceof ProcessPage) {
+                $callback->withScraPHP($this);
+                $callback->process($page);
+            }
+        } catch(HttpClientException $e) {
+            $this->urlErrors[] = [ 'url' => $url, 'pageProcessor' => $callback];
+            $this->logger->error('cant get url: '.$url);
         }
 
 
         return $this;
+    }
+
+
+    /**
+     * Tries to get a page from the given URL.
+     *
+     * @param string $url The URL of the page to retrieve.
+     * @throws HttpClientException If an error occurs while making the HTTP request.
+     * @return Page The retrieved page.
+     */
+    private function tryGetPage(string $url): Page
+    {
+        $tries = 0;
+        while($tries < $this->config['httpclient']['retry_count']) {
+            try {
+                return $this->httpClient->get($url);
+            } catch(HttpClientException $e) {
+                $tries++;
+                $this->logger->error('Error: '.$e->getMessage());
+                if($tries >= $this->config['httpclient']['retry_count']) {
+                    throw $e;
+                }
+                $this->logger->info('Retry in ('.($this->config['httpclient']['retry_time'] * $tries).') seconds: '.$url);
+                sleep($this->config['httpclient']['retry_time'] * $tries);
+            }
+
+        }
     }
 
     /**
@@ -95,6 +143,19 @@ final class ScraPHP
         return $this;
     }
 
+
+    /**
+     * Sets a logger for the current object and returns the object itself.
+     *
+     * @param LoggerInterface $logger The logger to be set.
+     * @return self The modified object.
+     */
+    public function withLogger(LoggerInterface $logger): self
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
     /**
      * Gets the writer object.
      *
@@ -109,13 +170,19 @@ final class ScraPHP
      * Fetches an asset from the specified URL.
      *
      * @param  string  $url The URL of the asset to fetch.
-     * @return string The fetched asset.
+     * @return ?string The contents of the asset.
      *
      * @throws AssetNotFoundException If the asset could not be found.
      */
-    public function fetchAsset(string $url): string
+    public function fetchAsset(string $url): ?string
     {
-        return $this->httpClient->fetchAsset($url);
+        try {
+            return $this->tryGetAsset($url);
+        } catch(HttpClientException $e) {
+            $this->assetErrors[] = [ 'url' => $url];
+            $this->logger->error('cant get asset: '.$url);
+        }
+        return null;
     }
 
     /**
@@ -124,20 +191,55 @@ final class ScraPHP
      * @param  string  $url The URL of the asset to be saved.
      * @param  string  $path The path where the asset should be saved.
      * @param  string|null  $filename The name of the file. If not provided, the basename of the URL will be used.
-     * @return string The path of the saved asset.
+     * @return ?string The path of the saved asset.
      *
      * @throws AssetNotFoundException If the asset could not be found.
      */
-    public function saveAsset(string $url, string $path, ?string $filename = null): string
+    public function saveAsset(string $url, string $path, ?string $filename = null): ?string
     {
-        $content = $this->httpClient->fetchAsset($url);
 
-        if ($filename === null) {
-            $filename = basename($url);
+        try {
+            $content = $this->tryGetAsset($url);
+            if ($filename === null) {
+                $filename = basename($url);
+            }
+            file_put_contents($path.$filename, $content);
+
+            return $path . $filename;
+
+        } catch(HttpClientException $e) {
+            $this->assetErrors[] = [ 'url' => $url];
+            $this->logger->error('cant get asset: '.$url);
         }
-        file_put_contents($path.$filename, $content);
 
-        return $path.$filename;
+        return null;
+    }
+
+
+    /**
+     * Tries to get an asset from a given URL.
+     *
+     * @param string $url The URL of the asset.
+     * @throws HttpClientException If an error occurs during the HTTP request.
+     * @return string The fetched asset.
+     */
+    private function tryGetAsset(string $url): string
+    {
+        $tries = 0;
+        while($tries < $this->config['httpclient']['retry_count']) {
+            try {
+                return $this->httpClient->fetchAsset($url);
+            } catch(HttpClientException $e) {
+                $tries++;
+                $this->logger->error('Error: '.$e->getMessage());
+                if($tries >= $this->config['httpclient']['retry_count']) {
+                    throw $e;
+                }
+                $this->logger->info('Retry in ('.($this->config['httpclient']['retry_time'] * $tries).') seconds: '.$url);
+                sleep($this->config['httpclient']['retry_time'] * $tries);
+            }
+
+        }
     }
 
     /**
@@ -174,5 +276,24 @@ final class ScraPHP
         $formatter = new LineFormatter("%datetime% %level_name%  %message% %context% %extra%\n", 'Y-m-d H:i:s');
         $handler->setFormatter($formatter);
         $this->logger->pushHandler($handler);
+    }
+
+    /**
+     * Gets the list of URL errors.
+     *
+     * @return array The list of URL errors.
+     */
+    public function urlErrors(): array
+    {
+        return $this->urlErrors;
+    }
+    /**
+     * Gets the list of asset errors.
+     *
+     * @return array The list of asset errors.
+     */
+    public function assetErrors(): array
+    {
+        return $this->assetErrors;
     }
 }

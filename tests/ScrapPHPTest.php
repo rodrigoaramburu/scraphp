@@ -8,6 +8,7 @@ use ScraPHP\ProcessPage;
 use Psr\Log\LoggerInterface;
 use ScraPHP\Writers\JsonWriter;
 use Scraphp\HttpClient\HttpClient;
+use ScraPHP\Exceptions\HttpClientException;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
 beforeEach(function () {
@@ -161,5 +162,167 @@ test('call class ProcessPage', function () {
     $pp->shouldReceive('process')->once();
 
     $scraphp->go('https://localhost:8000/teste.html', $pp);
+
+});
+
+
+
+test('retry get a url after a failed', function () {
+    $httpClient = Mockery::mock(HttpClient::class);
+    $httpClient
+        ->shouldReceive('get')
+        ->times(3)
+        ->andReturnUsing(function () use ($httpClient) {
+            static $counter = 0;
+            if($counter < 2) {
+                $counter++;
+                throw new HttpClientException('test');
+            }
+            return new Page(
+                content: '<h1>Hello World</h1>',
+                statusCode: 200,
+                headers: [],
+                url: 'https://localhost:8000/teste.html',
+                httpClient: $httpClient
+            );
+        });
+
+    $httpClient->shouldReceive('withLogger')->once();
+    $scraphp = new ScraPHP(config:[
+        'httpclient' => [
+            'retry_count' => 3,
+            'retry_time' => 1
+        ]
+    ]);
+
+    $loggerMock = Mockery::mock(LoggerInterface::class);
+    $loggerMock->shouldReceive('error');
+    $loggerMock->shouldReceive('info');
+    $scraphp->withHttpClient($httpClient)->withLogger($loggerMock);
+
+    $scraphp->go('http://localhost:8000/teste.html', function (Page $page) {
+
+    });
+
+
+    expect($scraphp->urlErrors())->toHaveCount(0);
+});
+
+
+
+test('save a failed url and its processor after tried 3 times', function () {
+    $httpClient = Mockery::mock(HttpClient::class);
+    $httpClient->shouldReceive('get')->times(3)->andThrows(new HttpClientException('test'));
+
+    $httpClient->shouldReceive('withLogger')->once();
+    $scraphp = new ScraPHP(config:[
+        'httpclient' => [
+            'retry_count' => 3,
+            'retry_time' => 1
+        ]
+    ]);
+
+    $loggerMock = Mockery::mock(LoggerInterface::class);
+    $loggerMock->shouldReceive('error');
+    $loggerMock->shouldReceive('info');
+    $scraphp->withHttpClient($httpClient)->withLogger($loggerMock);
+
+    $scraphp->go('http://localhost:8000/teste.html', function (Page $page) {
+
+    });
+
+
+    expect($scraphp->urlErrors()[0]['url'])->toContain('http://localhost:8000/teste.html');
+    expect($scraphp->urlErrors()[0]['pageProcessor'])->toBeInstanceOf(Closure::class);
+});
+
+
+test('retry get an asset if its fail', function () {
+
+    $httpClient = Mockery::mock(HttpClient::class);
+    $httpClient
+        ->shouldReceive('fetchAsset')
+        ->times(3)
+        ->andReturnUsing(function () use ($httpClient) {
+            static $counter = 0;
+            if($counter < 2) {
+                $counter++;
+                throw new HttpClientException('test');
+            }
+            return 'ABC';
+        });
+
+    $httpClient->shouldReceive('withLogger')->once();
+    $scraphp = new ScraPHP(config:[
+        'httpclient' => [
+            'retry_count' => 3,
+            'retry_time' => 1
+        ]
+    ]);
+
+    $loggerMock = Mockery::mock(LoggerInterface::class);
+    $loggerMock->shouldReceive('error');
+    $loggerMock->shouldReceive('info');
+    $scraphp->withHttpClient($httpClient)->withLogger($loggerMock);
+
+
+    $scraphp->fetchAsset('https://localhost:8000/teste.jpg');
+
+    expect($scraphp->assetErrors())->toHaveCount(0);
+
+});
+
+
+
+test('save a failed url asset tried 3 times', function () {
+    $httpClient = Mockery::mock(HttpClient::class);
+    $httpClient->shouldReceive('fetchAsset')
+        ->times(3)
+        ->andThrows(new HttpClientException('test'));
+
+    $httpClient->shouldReceive('withLogger')->once();
+    $scraphp = new ScraPHP(config:[
+        'httpclient' => [
+            'retry_count' => 3,
+            'retry_time' => 1
+        ]
+    ]);
+
+    $loggerMock = Mockery::mock(LoggerInterface::class);
+    $loggerMock->shouldReceive('error');
+    $loggerMock->shouldReceive('info');
+    $scraphp->withHttpClient($httpClient)->withLogger($loggerMock);
+
+    $scraphp->fetchAsset('http://localhost:8000/teste.jpg');
+
+
+    expect($scraphp->assetErrors()[0]['url'])->toContain('http://localhost:8000/teste.jpg');
+
+});
+
+
+test('save a failed url asset tried 3 times on saveAsset', function () {
+    $httpClient = Mockery::mock(HttpClient::class);
+    $httpClient->shouldReceive('fetchAsset')
+        ->times(3)
+        ->andThrows(new HttpClientException('test'));
+
+    $httpClient->shouldReceive('withLogger')->once();
+    $scraphp = new ScraPHP(config:[
+        'httpclient' => [
+            'retry_count' => 3,
+            'retry_time' => 1
+        ]
+    ]);
+
+    $loggerMock = Mockery::mock(LoggerInterface::class);
+    $loggerMock->shouldReceive('error');
+    $loggerMock->shouldReceive('info');
+    $scraphp->withHttpClient($httpClient)->withLogger($loggerMock);
+
+    $scraphp->saveAsset('http://localhost:8000/teste.jpg', 'teste.jpg');
+
+
+    expect($scraphp->assetErrors()[0]['url'])->toContain('http://localhost:8000/teste.jpg');
 
 });

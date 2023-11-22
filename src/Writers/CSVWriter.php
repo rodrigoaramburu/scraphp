@@ -88,7 +88,7 @@ final class CSVWriter extends Writer
      * @param  array<string, string>  $search The search criteria.
      * @return bool Returns true if the data matches the search criteria, and false otherwise.
      */
-    public function matchCriteria(array $data, array $search): bool
+    private function matchCriteria(array $data, array $search): bool
     {
         $flag = true;
 

@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-use Psr\Log\LoggerInterface;
-use ScraPHP\Exceptions\AssetNotFoundException;
-use ScraPHP\Exceptions\UrlNotFoundException;
-use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 use ScraPHP\Page;
+use Psr\Log\LoggerInterface;
+use ScraPHP\Exceptions\HttpClientException;
+use ScraPHP\Exceptions\UrlNotFoundException;
+use ScraPHP\Exceptions\AssetNotFoundException;
+use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
 beforeEach(function () {
 
@@ -71,3 +72,17 @@ test('throw exception if url not found', function () {
     $this->guzzleClient->get('http://localhost:8000/not-found.php');
 
 })->throws(UrlNotFoundException::class);
+
+
+test('throw exception if http client error', function () {
+    $this->logger->shouldReceive('info')->with('Accessing http://scraphp.com.br:8321/not-found.php');
+
+    $this->guzzleClient->get('http://scraphp.com.br:8321/not-found.php');
+})->throws(HttpClientException::class);
+
+
+test('throw exception if http client error on fetchAsset', function () {
+    $this->logger->shouldReceive('info')->with('Fetching asset http://scraphp.com.br:8321/not-found.jpg');
+
+    $this->guzzleClient->fetchAsset('http://scraphp.com.br:8321/not-found.jpg');
+})->throws(HttpClientException::class);
