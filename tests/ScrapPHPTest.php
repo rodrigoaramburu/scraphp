@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-use ScraPHP\Page;
+use ScraPHP\HttpClient\Page;
 use ScraPHP\ScraPHP;
 use ScraPHP\ProcessPage;
 use Psr\Log\LoggerInterface;
 use ScraPHP\Writers\JsonWriter;
 use Scraphp\HttpClient\HttpClient;
+use ScraPHP\HttpClient\Guzzle\GuzzlePage;
 use ScraPHP\Exceptions\HttpClientException;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
@@ -38,20 +39,19 @@ test('go to a page and return the body', function () {
     $this->httpClient->shouldReceive('get')
         ->once()
         ->with('https://localhost:8000/teste.html')
-        ->andReturn(new Page(
+        ->andReturn(new GuzzlePage(
             content: '<h1>Hello World</h1>',
             statusCode: 200,
             headers: [],
-            url: 'https://localhost:8000/teste.html',
-            httpClient: $this->httpClient
+            url: 'https://localhost:8000/teste.html'
         ));
 
     $this->scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
-        expect($page)->toBeInstanceOf(Page::class);
-        expect($page->content())->toBe('<h1>Hello World</h1>');
-        expect($page->statusCode())->toBe(200);
-        expect($page->headers())->toBe([]);
-        expect($page->url())->toBe('https://localhost:8000/teste.html');
+        expect($page)->toBeInstanceOf(Page::class)
+            ->htmlBody()->toBe('<h1>Hello World</h1>')
+            ->statusCode()->toBe(200)   
+            ->headers()->toBe([])
+            ->url()->toBe('https://localhost:8000/teste.html');
 
     });
 
@@ -62,12 +62,11 @@ test('bind the context if the callback is a closure', function () {
     $this->httpClient->shouldReceive('get')
         ->once()
         ->with('https://localhost:8000/teste.html')
-        ->andReturn(new Page(
+        ->andReturn(new GuzzlePage(
             content: '<h1>Hello World</h1>',
             statusCode: 200,
             headers: [],
-            url: 'https://localhost:8000/teste.html',
-            httpClient: $this->httpClient
+            url: 'https://localhost:8000/teste.html'
         ));
 
     $this->scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
@@ -145,13 +144,13 @@ test('inject the logger into the writer', function () {
 test('call class ProcessPage', function () {
 
     $httpClient = Mockery::mock(HttpClient::class);
-    $httpClient->shouldReceive('get')->andReturn(new Page(
-        content: '<h1>Hello World</h1>',
-        statusCode: 200,
-        headers: [],
-        url: 'https://localhost:8000/teste.html',
-        httpClient: $httpClient
-    ));
+    $httpClient->shouldReceive('get')
+        ->andReturn(new GuzzlePage(
+            content: '<h1>Hello World</h1>',
+            statusCode: 200,
+            headers: [],
+            url: 'https://localhost:8000/teste.html'
+        ));
     $httpClient->shouldReceive('withLogger')->once();
     $scraphp = new ScraPHP();
     $scraphp->withHttpClient($httpClient);
@@ -178,12 +177,11 @@ test('retry get a url after a failed', function () {
                 $counter++;
                 throw new HttpClientException('test');
             }
-            return new Page(
+            return new GuzzlePage(
                 content: '<h1>Hello World</h1>',
                 statusCode: 200,
                 headers: [],
-                url: 'https://localhost:8000/teste.html',
-                httpClient: $httpClient
+                url: 'https://localhost:8000/teste.html'
             );
         });
 

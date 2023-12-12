@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ScraPHP\HttpClient;
 
-use ScraPHP\Page;
+use ScraPHP\HttpClient\Page;
 
 interface HttpClient
 {

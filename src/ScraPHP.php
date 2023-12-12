@@ -8,13 +8,14 @@ use Closure;
 use Monolog\Level;
 use Monolog\Logger;
 use ScraPHP\Writers\Writer;
+use Psr\Log\LoggerInterface;
+use ScraPHP\HttpClient\Page;
 use Monolog\Handler\StreamHandler;
 use Scraphp\HttpClient\HttpClient;
 use Monolog\Formatter\LineFormatter;
-use Psr\Log\LoggerInterface;
+use ScraPHP\Exceptions\HttpClientException;
 use ScraPHP\Exceptions\UrlNotFoundException;
 use ScraPHP\Exceptions\AssetNotFoundException;
-use ScraPHP\Exceptions\HttpClientException;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 
 final class ScraPHP

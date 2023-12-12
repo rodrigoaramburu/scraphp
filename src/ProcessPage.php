@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ScraPHP;
 
+use ScraPHP\HttpClient\Page;
+
 abstract class ProcessPage
 {
     private ScraPHP $scraphp;

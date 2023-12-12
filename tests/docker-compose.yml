@@ -1,0 +1,25 @@
+version: "3.1"
+
+services:
+  php:
+    container_name: scraphp_php_test_server
+    build: 'docker/php'
+    working_dir: /application
+    ports:
+      - 8000:8000
+    volumes:
+      - './test-pages:/application'
+
+  selenium: 
+    image: selenium/standalone-chrome:latest
+    shm_size: 2gb
+    container_name: scraphp_test_selenium
+    network_mode: "host"
+    ports:
+      - 4444:4444
+      - 7900:7900 
+    environment:
+          - START_XVFB=false
+          - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+          - SE_NODE_MAX_SESSIONS=20
+          - JAVA_OPTS=-XX:ActiveProcessorCount=5
