@@ -1,15 +1,14 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
-use ScraPHP\HttpClient\HtmlElement;
 use Facebook\WebDriver\Chrome\ChromeOptions;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use ScraPHP\HttpClient\WebDriver\WebDriverPage;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
 use ScraPHP\HttpClient\FilteredElement;
+use ScraPHP\HttpClient\WebDriver\WebDriverPage;
 
-beforeEach(function(){
+beforeEach(function () {
     $chromeOptions = new ChromeOptions();
     $chromeOptions->addArguments(['-headless']);
 
@@ -20,30 +19,29 @@ beforeEach(function(){
 
 });
 
-afterEach(function(){
+afterEach(function () {
     $this->webDriver->quit();
 });
 
 test('have attributes', function () {
     $this->webDriver->get('http://localhost:8000/hello-world.php');
-    
+
     $page = new WebDriverPage(
         webDriver: $this->webDriver,
         statusCode: 200,
-        headers: ['Content-Type'=>['text/html; charset=UTF-8']],
+        headers: ['Content-Type' => ['text/html; charset=UTF-8']],
     );
 
     expect($page)->toBeInstanceOf(WebDriverPage::class)
         ->url()->toBe('http://localhost:8000/hello-world.php')
         ->statusCode()->toBe(200)
-        ->htmlBody()->toContain('<title>Página Teste</title>','<h1>Hello World</h1>')
+        ->htmlBody()->toContain('<title>Página Teste</title>', '<h1>Hello World</h1>')
         ->headers()->toBeArray()
-        ->headers()->toBe(['Content-Type'=>['text/html; charset=UTF-8']])
+        ->headers()->toBe(['Content-Type' => ['text/html; charset=UTF-8']])
         ->header('Content-Type')->toBe(['text/html; charset=UTF-8'])
         ->webDriver()->toBe($this->webDriver);
 
 });
-
 
 test('filter elements by tag name', function () {
 
@@ -60,7 +58,6 @@ test('filter elements by tag name', function () {
     expect($text)->toBe('Teste Seletores Titulo');
 });
 
-
 test('filter elements by class', function () {
 
     $this->webDriver->get('http://localhost:8000/seletors.html');
@@ -74,7 +71,6 @@ test('filter elements by class', function () {
 
     expect($text)->toBe('Lorem ipsum dolor sit amet consectetur.');
 });
-
 
 test('get attribute from element', function () {
     $this->webDriver->get('http://localhost:8000/seletors.html');
@@ -103,7 +99,6 @@ test('iterate filtered elements', function () {
 
     expect($result)->toBe(['Item 1 - 0', 'Item 2 - 1', 'Item 3 - 2']);
 });
-
 
 test('chain filterCSS', function () {
     $this->webDriver->get('http://localhost:8000/seletors.html');
@@ -161,7 +156,6 @@ test('filter with js', function () {
     expect($result)->toBe('Lorem ipsum dolor sit amet consectetur.');
 });
 
-
 test('return null if element not found', function () {
 
     $this->webDriver->get('http://localhost:8000/paragraph.html');
@@ -190,7 +184,6 @@ test('return null if element not found in chain', function () {
     expect($result)->toBeNull();
 });
 
-
 test('return empty array iterating on not found filtered elements', function () {
     $this->webDriver->get('http://localhost:8000/seletors.html');
     $page = new WebDriverPage(
@@ -202,6 +195,6 @@ test('return empty array iterating on not found filtered elements', function () 
     $result = $page->filterCSSEach('ul .not-found', function (FilteredElement $element, int $i) {
         return $element->text().' - '.$i;
     });
-    
+
     expect($result)->toBe([]);
 });

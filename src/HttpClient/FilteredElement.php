@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 declare(strict_types=1);
 
 namespace ScraPHP\HttpClient;
@@ -12,5 +13,4 @@ interface FilteredElement
     public function filterCSS(string $cssSelector): ?FilteredElement;
 
     public function filterCSSEach(string $cssSelector, callable $callback): array;
-    
 }

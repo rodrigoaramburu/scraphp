@@ -6,7 +6,7 @@ namespace ScraPHP\Writers;
 
 use Exception;
 
-final class CSVWriter extends Writer
+final class CSVWriter implements Writer
 {
     private mixed $file;
 
@@ -52,7 +52,6 @@ final class CSVWriter extends Writer
         }
 
         fwrite($this->file, "\n".implode($this->separator, $orderedData));
-        $this->logger()->info('Saved data: '.json_encode($orderedData));
     }
 
     /**

@@ -1,5 +1,5 @@
 
-
+![example workflow](https://github.com/rodrigoaramburu/scraphp/actions/workflows/ci.yml/badge.svg)
 
 # Executar Selenium
 

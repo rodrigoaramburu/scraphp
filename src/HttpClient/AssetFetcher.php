@@ -1,25 +1,23 @@
-<?php 
+<?php
+
 declare(strict_types=1);
 
 namespace ScraPHP\HttpClient;
 
-use Psr\Log\LoggerInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
-use ScraPHP\Exceptions\HttpClientException;
 use ScraPHP\Exceptions\AssetNotFoundException;
+use ScraPHP\Exceptions\HttpClientException;
 
 final class AssetFetcher
 {
-
     private \GuzzleHttp\Client $client;
 
-    public function __construct(
-        private LoggerInterface $logger,
-    ){
+    public function __construct()
+    {
         $this->client = new \GuzzleHttp\Client();
     }
-    
+
     /**
      * Fetches an asset from the given URL.
      *
@@ -31,15 +29,12 @@ final class AssetFetcher
     public function fetchAsset(string $url): string
     {
         try {
-            $this->logger->info('Fetching asset '.$url);
             $response = $this->client->request('GET', $url);
-            $this->logger->info('Status: '.$response->getStatusCode().' '.$url);
         } catch (ClientException $e) {
             if ($e->getCode() === 404) {
-                $this->logger->error('404 NOT FOUND '.$url);
                 throw new AssetNotFoundException($url.' not found');
             }
-        } catch(ConnectException $e) {
+        } catch (ConnectException $e) {
             throw new HttpClientException($e->getMessage(), $e->getCode(), $e);
         }
 

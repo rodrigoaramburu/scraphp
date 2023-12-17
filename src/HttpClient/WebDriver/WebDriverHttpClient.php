@@ -1,39 +1,36 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\WebDriver;
 
 use Exception;
-use Psr\Log\LoggerInterface;
-use ScraPHP\HttpClient\Page;
-
-use ScraPHP\HttpClient\HttpClient;
-use Facebook\WebDriver\WebDriverBy;
-use ScraPHP\HttpClient\AssetFetcher;
-use ScraPHP\Exceptions\HttpClientException;
 use Facebook\WebDriver\Chrome\ChromeOptions;
-use ScraPHP\Exceptions\UrlNotFoundException;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Psr\Log\LoggerInterface;
+use ScraPHP\Exceptions\HttpClientException;
+use ScraPHP\Exceptions\UrlNotFoundException;
+use ScraPHP\HttpClient\AssetFetcher;
+use ScraPHP\HttpClient\HttpClient;
+use ScraPHP\HttpClient\Page;
 
 final class WebDriverHttpClient implements HttpClient
 {
-
     private RemoteWebDriver $webDriver;
+
     private AssetFetcher $assetFetcher;
 
     /**
      * Constructor for the class.
      *
-     * @param LoggerInterface $logger The logger instance.
+     * @param  LoggerInterface  $logger The logger instance.
      */
     public function __construct(
-        private LoggerInterface $logger,
         private $webDriverUrl = 'http://localhost:4444'
-    )
-    {
+    ) {
         $chromeOptions = new ChromeOptions();
         $chromeOptions->addArguments(['-headless']);
 
@@ -41,10 +38,9 @@ final class WebDriverHttpClient implements HttpClient
         $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
         $this->webDriver = RemoteWebDriver::create($webDriverUrl, $desiredCapabilities);
-    
-        $this->assetFetcher = new AssetFetcher($this->logger);
-    }
 
+        $this->assetFetcher = new AssetFetcher();
+    }
 
     /**
      * Destructor method for the class.
@@ -61,32 +57,29 @@ final class WebDriverHttpClient implements HttpClient
     /**
      * Retrieves a web page using the specified URL and returns a Page object.
      *
-     * @param string $url The URL of the web page to retrieve.
+     * @param  string  $url The URL of the web page to retrieve.
+     * @return Page The Page object representing the retrieved web page.
+     *
      * @throws HttpClient An exception that is thrown when an error occurs while accessing the URL.
      * @throws UrlNotFoundException An exception that is thrown when the web page is not found (404 error).
-     * @return Page The Page object representing the retrieved web page.
      */
     public function get(string $url): Page
     {
-        $this->logger->info('Accessing ' . $url);
 
-        try{
+        try {
             $this->webDriver->get($url);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             throw new HttpClientException($e->getMessage(), $e->getCode(), $e);
         }
 
-        try{
+        try {
             $title = $this->webDriver->findElement(WebDriverBy::cssSelector('h1'))->getText();
-            if(str_contains( $title , 'Not Found') ){
-                $this->logger->error('404 NOT FOUND ' . $url);
+            if (str_contains($title, 'Not Found')) {
                 throw new UrlNotFoundException($url);
             }
-        }catch(NoSuchElementException $e){
+        } catch (NoSuchElementException $e) {
             // ok não é uma página de erro
         }
-
-        $this->logger->info('Status: ' . 200 . ' ' . $url);
 
         return new WebDriverPage(
             webDriver: $this->webDriver,
@@ -105,12 +98,6 @@ final class WebDriverHttpClient implements HttpClient
      */
     public function fetchAsset(string $url): string
     {
-       return $this->assetFetcher->fetchAsset($url);
+        return $this->assetFetcher->fetchAsset($url);
     }
-
-    public function withLogger(): LoggerInterface
-    {
-        return $this->logger;
-    }
-
 }

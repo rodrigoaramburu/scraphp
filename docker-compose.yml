@@ -8,7 +8,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - './test-pages:/application'
+      - './tests/test-pages:/application'
 
   selenium: 
     image: selenium/standalone-chrome:latest

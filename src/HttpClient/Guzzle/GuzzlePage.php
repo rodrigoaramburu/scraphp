@@ -1,11 +1,11 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\Guzzle;
 
-use ScraPHP\HttpClient\Page;
 use ScraPHP\HttpClient\FilteredElement;
+use ScraPHP\HttpClient\Page;
 use Symfony\Component\DomCrawler\Crawler;
 
 final class GuzzlePage implements Page
@@ -15,26 +15,29 @@ final class GuzzlePage implements Page
         private int $statusCode,
         private string $content,
         private array $headers
-    )
-    {        
+    ) {
     }
 
     public function statusCode(): int
     {
         return $this->statusCode;
     }
+
     public function url(): string
     {
         return $this->url;
     }
+
     public function htmlBody(): string
     {
         return $this->content;
     }
+
     public function headers(): array
     {
         return $this->headers;
     }
+
     public function header(string $key): array
     {
         return $this->headers[$key] ?? [];
@@ -50,10 +53,11 @@ final class GuzzlePage implements Page
 
         return new GuzzleFilteredElement(crawler: $crawler);
     }
+
     public function filterCSSEach(string $cssSelector, callable $callback): array
     {
         $crawler = new Crawler($this->content);
-     
+
         $filter = $crawler->filter($cssSelector);
 
         return $filter->each(static function (Crawler $crawler, int $i) use ($callback) {

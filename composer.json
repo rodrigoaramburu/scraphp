@@ -30,5 +30,11 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "lint": ["pint"],
+        "test": ["pest"],
+        "test:lint": ["pint --test"],
+        "test:stan": ["phpstan analyse"]
     }
 }

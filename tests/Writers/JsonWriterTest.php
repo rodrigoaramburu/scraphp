@@ -9,7 +9,6 @@ beforeEach(function () {
     /** @var LoggerInterface */
     $this->logger = Mockery::mock(LoggerInterface::class);
     $this->jsonWriter = new JsonWriter(__DIR__.'/../assets/test.json');
-    $this->jsonWriter->withLogger($this->logger);
 });
 
 afterEach(function () {
@@ -20,7 +19,6 @@ afterEach(function () {
 
 test('write a json file', function () {
 
-    $this->logger->shouldReceive('info')->once();
     $this->jsonWriter->write([
         'name' => 'Rodrigo',
         'lastname' => 'Aramburu',
@@ -39,7 +37,6 @@ test('write a json file', function () {
 
 test('check if a value exists in the jsons file', function () {
 
-    $this->logger->shouldReceive('info')->times(3);
     $this->jsonWriter->write([
         'name' => 'Rodrigo',
         'lastname' => 'Aramburu',
@@ -64,7 +61,6 @@ test('check if a value exists in the jsons file', function () {
 
 test('check if a value exists in the json file with two criteria', function () {
 
-    $this->logger->shouldReceive('info')->times(3);
     $this->jsonWriter->write([
         'name' => 'Rodrigo',
         'lastname' => 'Aramburu',
@@ -95,7 +91,6 @@ test('add content to a existing json', function () {
         ],
     ]));
 
-    $this->logger->shouldReceive('info')->once();
     $this->jsonWriter->write([
         'name' => 'Antonio',
         'lastname' => 'Silva',

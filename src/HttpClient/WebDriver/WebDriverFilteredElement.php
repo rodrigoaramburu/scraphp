@@ -1,20 +1,20 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\WebDriver;
 
+use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use ScraPHP\HttpClient\FilteredElement;
-use Facebook\WebDriver\Remote\RemoteWebElement;
-use Facebook\WebDriver\Exception\NoSuchElementException;
 
 final class WebDriverFilteredElement implements FilteredElement
 {
-
     public function __construct(
         private RemoteWebElement $remoteWebElement
-    ){}
+    ) {
+    }
 
     public function text(): string
     {
@@ -28,13 +28,14 @@ final class WebDriverFilteredElement implements FilteredElement
 
     public function filterCSS(string $cssSelector): ?FilteredElement
     {
-        try{
+        try {
             $remoteWebElement = $this->remoteWebElement->findElement(
                 WebDriverBy::cssSelector($cssSelector)
             );
-        }catch (NoSuchElementException $exception){
+        } catch (NoSuchElementException $exception) {
             return null;
         }
+
         return new WebDriverFilteredElement(
             remoteWebElement: $remoteWebElement
         );
@@ -48,6 +49,7 @@ final class WebDriverFilteredElement implements FilteredElement
         foreach ($elements as $key => $element) {
             $data[] = $callback(new WebDriverFilteredElement(remoteWebElement: $element), $key);
         }
+
         return $data;
     }
 }

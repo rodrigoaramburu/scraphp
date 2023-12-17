@@ -1,10 +1,9 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
 use ScraPHP\HttpClient\FilteredElement;
 use ScraPHP\HttpClient\Guzzle\GuzzlePage;
-
 
 test('have attributes', function () {
     $page = new GuzzlePage(
@@ -17,12 +16,11 @@ test('have attributes', function () {
     expect($page)->toBeInstanceOf(GuzzlePage::class)
         ->url()->toBe('http://localhost:8000/hello-world.php')
         ->statusCode()->toBe(200)
-        ->htmlBody()->toContain('<title>Página Teste</title>','<h1>Hello World</h1>')
+        ->htmlBody()->toContain('<title>Página Teste</title>', '<h1>Hello World</h1>')
         ->headers()->toBeArray()
         ->headers()->toBe([]);
 
 });
-
 
 test('filter elements by tag name', function () {
 
@@ -52,7 +50,6 @@ test('filter elements by class', function () {
     expect($text)->toBe('Lorem ipsum dolor sit amet consectetur.');
 });
 
-
 test('get attribute from element', function () {
     $page = new GuzzlePage(
         url: 'http://localhost:8000/seletors.html',
@@ -65,7 +62,6 @@ test('get attribute from element', function () {
 
     expect($attr)->toBe('https://www.google.com');
 });
-
 
 test('iterate filtered elements', function () {
     $page = new GuzzlePage(
@@ -94,7 +90,6 @@ test('chain filterCSS', function () {
 
     expect($text)->toBe('Item 1');
 });
-
 
 test('chain css filterCSS with filterCSSEach ', function () {
     $page = new GuzzlePage(
@@ -125,7 +120,6 @@ test('chain css filterEach with filterCSS', function () {
 
     expect($result)->toBe(['Anderson', 'Carlos', 'Rafael']);
 });
-
 
 test('return null when filter element not found', function () {
     $page = new GuzzlePage(

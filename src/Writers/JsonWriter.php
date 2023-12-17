@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ScraPHP\Writers;
 
-final class JsonWriter extends Writer
+final class JsonWriter implements Writer
 {
     private string $filename;
 
@@ -33,8 +33,6 @@ final class JsonWriter extends Writer
         $jsonData = json_decode($json, true);
         $jsonData[] = $data;
         file_put_contents($this->filename, json_encode($jsonData, JSON_PRETTY_PRINT));
-
-        $this->logger()->info('Saved data: '.json_encode($data));
     }
 
     /**
