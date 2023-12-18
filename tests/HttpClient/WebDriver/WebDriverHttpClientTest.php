@@ -65,4 +65,4 @@ test('throw exception if http client error', function () {
 
     $this->webDriverClient->get('asdf');
 })
-    ->throws(HttpClientException::class);
+->throws(HttpClientException::class);

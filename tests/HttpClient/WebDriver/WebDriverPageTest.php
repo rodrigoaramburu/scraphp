@@ -198,3 +198,18 @@ test('return empty array iterating on not found filtered elements', function () 
 
     expect($result)->toBe([]);
 });
+
+
+test('have a title', function () {
+
+    $this->webDriver->get('http://localhost:8000/hello-world.php');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    expect($page)->toBeInstanceOf(WebDriverPage::class)
+        ->title()->toBe('Página Teste');
+
+});

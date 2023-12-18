@@ -102,7 +102,7 @@ final class ScraPHPBuilder
      * Create a web driver client for the ScraPHP class.
      *
      * @param string $url The URL of the WebDriver. Default is 'http://localhost:4444'.
-     * 
+     *
      * @return self The current instance of this class.
      */
     public function withWebDriver(string $url = 'http://localhost:4444'): self

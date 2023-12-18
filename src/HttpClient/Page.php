@@ -19,4 +19,6 @@ interface Page
     public function filterCSS(string $cssSelector): ?FilteredElement;
 
     public function filterCSSEach(string $cssSelector, callable $callback): array;
+
+    public function title(): string;
 }

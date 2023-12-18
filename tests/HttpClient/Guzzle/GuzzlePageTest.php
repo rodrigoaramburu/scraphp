@@ -146,3 +146,17 @@ test('return null when filter element not found in chain', function () {
 
     expect($result)->toBeNull();
 });
+
+
+test('have title', function () {
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/hello-world.php',
+        content: file_get_contents(__DIR__.'/../../test-pages/hello-world.php'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    expect($page)->toBeInstanceOf(GuzzlePage::class)
+        ->title()->toBe('Página Teste');
+
+});

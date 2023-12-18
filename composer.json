@@ -32,9 +32,9 @@
         }
     },
     "scripts": {
-        "lint": ["pint"],
+        "lint": ["pint --preset=psr12"],
         "test": ["pest"],
-        "test:lint": ["pint --test"],
+        "test:lint": ["pint --preset=psr12 --test"],
         "test:stan": ["phpstan analyse"]
     }
 }

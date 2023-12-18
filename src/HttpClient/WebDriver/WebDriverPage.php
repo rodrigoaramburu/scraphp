@@ -75,4 +75,9 @@ final class WebDriverPage implements Page
 
         return $data;
     }
+
+    public function title(): string
+    {
+        return $this->webDriver->getTitle();
+    }
 }

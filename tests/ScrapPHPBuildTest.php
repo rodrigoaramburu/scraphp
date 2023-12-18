@@ -71,7 +71,7 @@ test('pass retryTime and retryCount', function () {
 
 
 test('create a scraphp instance with webdriver', function () {
-   
+
     $scraphp = ScraPHP::build()
         ->withWebDriver('http://localhost:4444')
         ->create();

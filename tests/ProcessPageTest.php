@@ -11,8 +11,7 @@ use ScraPHP\Writers\Writer;
 
 test('bind scraphp methods to instance', function () {
 
-    $pp = new class() extends ProcessPage
-    {
+    $pp = new class () extends ProcessPage {
         public function process(Page $page): void
         {
         }

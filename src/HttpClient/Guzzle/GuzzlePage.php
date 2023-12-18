@@ -64,4 +64,12 @@ final class GuzzlePage implements Page
             return $callback(new GuzzleFilteredElement(crawler: $crawler), $i);
         });
     }
+
+
+    public function title(): string
+    {
+        $crawler = new Crawler($this->content);
+
+        return $crawler->filter('title')->text();
+    }
 }
