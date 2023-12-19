@@ -8,9 +8,11 @@ use Monolog\Level;
 use Monolog\Logger;
 use ScraPHP\Writers\Writer;
 use Psr\Log\LoggerInterface;
+use ScraPHP\Writers\CSVWriter;
 use ScraPHP\Writers\JsonWriter;
 use Monolog\Handler\StreamHandler;
 use ScraPHP\HttpClient\HttpClient;
+use ScraPHP\Writers\DatabaseWriter;
 use Monolog\Formatter\LineFormatter;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 use ScraPHP\HttpClient\WebDriver\WebDriverHttpClient;
@@ -108,6 +110,40 @@ final class ScraPHPBuilder
     public function withWebDriver(string $url = 'http://localhost:4444'): self
     {
         $this->httpClient = new WebDriverHttpClient($url);
+        return $this;
+    }
+
+    /**
+     * Sets the writer of the object to an instance of JsonWriter with the specified filename.
+     *
+     * @param string $filename The name of the file to write JSON data to.
+     * @return self Returns the modified object with the new writer.
+     */
+    public function withJsonWriter(string $filename): self
+    {
+        $this->writer = new JsonWriter($filename);
+        return $this;
+    }
+
+    /**
+     * Sets the CSV writer for the object and returns the object itself.
+     *
+     * @param string $filename The name of the CSV file.
+     * @return self The object with the CSV writer set.
+     */
+    public function withCSVWriter(
+        string $filename, 
+        array $headers = [], 
+        string $delimiter = ','
+    ): self
+    {
+        $this->writer = new CSVWriter($filename, $headers, $delimiter);
+        return $this;
+    }
+
+    public function withDatabaseWriter(\PDO $pdo, string $table): self
+    {
+        $this->writer = new DatabaseWriter($pdo, $table);
         return $this;
     }
 

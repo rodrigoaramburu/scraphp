@@ -10,6 +10,7 @@ final class CSVWriter implements Writer
 {
     private mixed $file;
 
+    private string $filename;
     /**
      * The header to include in the file.
      *
@@ -28,6 +29,7 @@ final class CSVWriter implements Writer
      */
     public function __construct(string $filename, array $header = [], string $separator = ',')
     {
+        $this->filename = $filename;
         $this->header = $header;
         $this->separator = $separator;
         if (file_exists($filename)) {
@@ -149,5 +151,35 @@ final class CSVWriter implements Writer
     public function __destruct()
     {
         fclose($this->file);
+    }
+
+    /**
+     * Returns the filename.
+     *
+     * @return string The filename.
+     */
+    public function filename(): string
+    {
+        return $this->filename;
+    }
+
+    /**
+     * Gets the headers array of the file.
+     *
+     * @return array The header array.
+     */
+    public function header(): array
+    {
+        return $this->header;
+    }
+
+    /**
+     * Gets the separator used.
+     *
+     * @return string The separator.
+     */
+    public function separator(): string
+    {
+        return $this->separator;
     }
 }

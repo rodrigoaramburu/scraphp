@@ -76,4 +76,10 @@ final class JsonWriter implements Writer
 
         return $flag;
     }
+
+
+    public function filename(): string
+    {
+        return $this->filename;
+    }
 }

@@ -5,15 +5,22 @@ declare(strict_types=1);
 use Monolog\Logger;
 use ScraPHP\ScraPHP;
 use ScraPHP\Writers\Writer;
+use ScraPHP\Writers\CSVWriter;
 use ScraPHP\Writers\JsonWriter;
 use ScraPHP\HttpClient\HttpClient;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 use ScraPHP\HttpClient\WebDriver\WebDriverHttpClient;
+use ScraPHP\Writers\DatabaseWriter;
 
 afterEach(function () {
-    if (file_exists('out.json')) {
-        unlink('out.json');
+    
+    $files = ['out.json', 'file.json', 'file.cvs'];
+    foreach ($files as $file) {
+        if (file_exists($file)) {
+            unlink($file);
+        }
     }
+    
 });
 
 test('create a scraphp instance with attributes', function () {
@@ -78,4 +85,42 @@ test('create a scraphp instance with webdriver', function () {
 
     expect($scraphp)->toBeInstanceOf(ScraPHP::class);
     expect($scraphp->httpClient())->toBeInstanceOf(WebDriverHttpClient::class);
+});
+
+test('create a scraphp instance with jsonwriter', function () {
+    
+    $scraphp = ScraPHP::build()
+        ->withJsonWriter('file.json')
+        ->create();
+
+    expect($scraphp)->toBeInstanceOf(ScraPHP::class);
+    expect($scraphp->writer())->toBeInstanceOf(JsonWriter::class);
+    expect($scraphp->writer())
+        ->filename()->toBe('file.json');
+});
+
+test('create a scraphp instance with csvwriter', function () {
+    
+    $scraphp = ScraPHP::build()
+        ->withCSVWriter('file.cvs', ['title', 'content'], ',')
+        ->create();
+
+    expect($scraphp)->toBeInstanceOf(ScraPHP::class);
+    expect($scraphp->writer())->toBeInstanceOf(CSVWriter::class);
+    expect($scraphp->writer())
+        ->filename()->toBe('file.cvs')
+        ->header()->toBe(['title', 'content'])
+        ->separator()->toBe(',');
+});
+
+test('create a scraphp instance with databasewriter', function () {
+    
+    $con = Mockery::mock(\PDO::class);
+
+    $scraphp = ScraPHP::build()
+        ->withDatabaseWriter($con, 'posts')
+        ->create();
+
+    expect($scraphp)->toBeInstanceOf(ScraPHP::class);
+    expect($scraphp->writer())->toBeInstanceOf(DatabaseWriter::class);
 });
