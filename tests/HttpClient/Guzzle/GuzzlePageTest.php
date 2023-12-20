@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use ScraPHP\HttpClient\FilteredElement;
 use ScraPHP\HttpClient\Guzzle\GuzzlePage;
+use ScraPHP\Exceptions\InvalidLinkException;
 
 test('have attributes', function () {
     $page = new GuzzlePage(
@@ -160,3 +161,64 @@ test('have title', function () {
         ->title()->toBe('Página Teste');
 
 });
+
+test('get a link data', function () {
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/folder1/folder2/link.html',
+        content: file_get_contents(__DIR__.'/../../test-pages/folder1/folder2/link.html'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    $link = $page->filterCSS('#link1')->link();
+
+    expect($link)
+        ->text()->toBe('Link 1')
+        ->uri()->toBe('http://localhost:8000/folder1/folder2/page1.html?param1=value1&param2=value2')
+        ->rawUri()->toBe('http://localhost:8000/folder1/folder2/page1.html?param1=value1&param2=value2')
+        ->query()->toBe(['param1' => 'value1', 'param2' => 'value2']);
+});
+
+test('get a link uri without domain', function () {
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/folder1/folder2/link.html',
+        content: file_get_contents(__DIR__.'/../../test-pages/folder1/folder2/link.html'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    $link = $page->filterCSS('#link2')->link();
+
+    expect($link)
+        ->text()->toBe('Link 2')
+        ->uri()->toBe('http://localhost:8000/folder1/folder2/page2.html');
+});
+
+test('get a link uri relative', function () {
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/folder1/folder2/link.html',
+        content: file_get_contents(__DIR__.'/../../test-pages/folder1/folder2/link.html'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    $link = $page->filterCSS('#link3')->link();
+
+    expect($link)
+        ->text()->toBe('Link 3')
+        ->uri()->toBe('http://localhost:8000/folder1/folder2/page3.html');
+});
+
+
+test('throw exception if link is invalid', function () {
+
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/folder1/folder2/link.html',
+        content: file_get_contents(__DIR__.'/../../test-pages/folder1/folder2/link.html'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    $link = $page->filterCSS('#not-link')->link();
+
+})->throws(InvalidLinkException::class);

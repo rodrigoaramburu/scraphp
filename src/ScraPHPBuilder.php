@@ -132,11 +132,10 @@ final class ScraPHPBuilder
      * @return self The object with the CSV writer set.
      */
     public function withCSVWriter(
-        string $filename, 
-        array $headers = [], 
+        string $filename,
+        array $headers = [],
         string $delimiter = ','
-    ): self
-    {
+    ): self {
         $this->writer = new CSVWriter($filename, $headers, $delimiter);
         return $this;
     }

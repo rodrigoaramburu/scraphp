@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\WebDriver;
 
-use Facebook\WebDriver\Exception\NoSuchElementException;
-use Facebook\WebDriver\Remote\RemoteWebElement;
+use ScraPHP\Link;
+use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use ScraPHP\HttpClient\FilteredElement;
+use ScraPHP\Exceptions\InvalidLinkException;
+use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\Exception\NoSuchElementException;
 
 final class WebDriverFilteredElement implements FilteredElement
 {
     public function __construct(
-        private RemoteWebElement $remoteWebElement
+        private RemoteWebElement $remoteWebElement,
+        private WebDriver $webDriver
     ) {
     }
 
@@ -37,7 +41,8 @@ final class WebDriverFilteredElement implements FilteredElement
         }
 
         return new WebDriverFilteredElement(
-            remoteWebElement: $remoteWebElement
+            remoteWebElement: $remoteWebElement,
+            webDriver: $this->webDriver
         );
     }
 
@@ -47,9 +52,36 @@ final class WebDriverFilteredElement implements FilteredElement
 
         $data = [];
         foreach ($elements as $key => $element) {
-            $data[] = $callback(new WebDriverFilteredElement(remoteWebElement: $element), $key);
+            $data[] = $callback(
+                new WebDriverFilteredElement(
+                    remoteWebElement: $element,
+                    webDriver: $this->webDriver
+                ),
+                $key
+            );
         }
 
         return $data;
+    }
+
+
+    /**
+     * Gets a Link object based on the properties of the remote web element.
+     *
+     * @return Link The Link object representing the remote web element.
+     */
+    public function link(): Link
+    {
+        $rawUri = $this->remoteWebElement->getText();
+        $baseUri = $this->remoteWebElement->getAttribute('href');
+
+        if($rawUri === null || $baseUri === null) {
+            throw new InvalidLinkException('Unable to get link');
+        }
+        return new Link(
+            text: $rawUri,
+            rawUri: $baseUri,
+            baseUri: $this->webDriver->getCurrentURL()
+        );
     }
 }

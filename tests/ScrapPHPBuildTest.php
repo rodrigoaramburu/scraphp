@@ -13,14 +13,14 @@ use ScraPHP\HttpClient\WebDriver\WebDriverHttpClient;
 use ScraPHP\Writers\DatabaseWriter;
 
 afterEach(function () {
-    
+
     $files = ['out.json', 'file.json', 'file.cvs'];
     foreach ($files as $file) {
         if (file_exists($file)) {
             unlink($file);
         }
     }
-    
+
 });
 
 test('create a scraphp instance with attributes', function () {
@@ -88,7 +88,7 @@ test('create a scraphp instance with webdriver', function () {
 });
 
 test('create a scraphp instance with jsonwriter', function () {
-    
+
     $scraphp = ScraPHP::build()
         ->withJsonWriter('file.json')
         ->create();
@@ -100,7 +100,7 @@ test('create a scraphp instance with jsonwriter', function () {
 });
 
 test('create a scraphp instance with csvwriter', function () {
-    
+
     $scraphp = ScraPHP::build()
         ->withCSVWriter('file.cvs', ['title', 'content'], ',')
         ->create();
@@ -114,7 +114,7 @@ test('create a scraphp instance with csvwriter', function () {
 });
 
 test('create a scraphp instance with databasewriter', function () {
-    
+
     $con = Mockery::mock(\PDO::class);
 
     $scraphp = ScraPHP::build()

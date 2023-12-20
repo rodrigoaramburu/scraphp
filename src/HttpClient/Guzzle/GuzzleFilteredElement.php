@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\Guzzle;
 
+use ScraPHP\Link;
 use ScraPHP\HttpClient\FilteredElement;
 use Symfony\Component\DomCrawler\Crawler;
+use ScraPHP\Exceptions\InvalidLinkException;
 
 final class GuzzleFilteredElement implements FilteredElement
 {
@@ -51,5 +53,22 @@ final class GuzzleFilteredElement implements FilteredElement
         return $filter->each(static function (Crawler $crawler, int $i) use ($callback) {
             return $callback(new GuzzleFilteredElement(crawler: $crawler), $i);
         });
+    }
+
+
+    public function link(): Link
+    {
+        $rawUri = $this->crawler->attr('href');
+        $baseUri = $this->crawler->getUri();
+
+        if($rawUri === null || $baseUri === null) {
+            throw new InvalidLinkException('Unable to get link');
+        }
+
+        return new Link(
+            text: $this->crawler->text(),
+            rawUri: $this->crawler->attr('href'),
+            baseUri: $this->crawler->getUri()
+        );
     }
 }

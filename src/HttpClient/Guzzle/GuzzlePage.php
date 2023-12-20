@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace ScraPHP\HttpClient\Guzzle;
 
-use ScraPHP\HttpClient\FilteredElement;
 use ScraPHP\HttpClient\Page;
+use ScraPHP\HttpClient\FilteredElement;
 use Symfony\Component\DomCrawler\Crawler;
 
 final class GuzzlePage implements Page
@@ -45,7 +45,10 @@ final class GuzzlePage implements Page
 
     public function filterCSS(string $cssSelector): ?FilteredElement
     {
-        $crawler = new Crawler($this->content);
+        $crawler = new Crawler(
+            $this->content,
+            $this->url
+        );
         $crawler = $crawler->filter($cssSelector);
         if ($crawler->count() === 0) {
             return null;
@@ -56,7 +59,10 @@ final class GuzzlePage implements Page
 
     public function filterCSSEach(string $cssSelector, callable $callback): array
     {
-        $crawler = new Crawler($this->content);
+        $crawler = new Crawler(
+            $this->content,
+            $this->url
+        );
 
         $filter = $crawler->filter($cssSelector);
 

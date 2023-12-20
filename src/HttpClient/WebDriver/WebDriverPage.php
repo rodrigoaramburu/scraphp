@@ -60,7 +60,8 @@ final class WebDriverPage implements Page
         }
 
         return new WebDriverFilteredElement(
-            remoteWebElement: $remoteWebElement
+            remoteWebElement: $remoteWebElement,
+            webDriver: $this->webDriver
         );
     }
 
@@ -70,7 +71,13 @@ final class WebDriverPage implements Page
 
         $data = [];
         foreach ($elements as $key => $element) {
-            $data[] = $callback(new WebDriverFilteredElement(remoteWebElement: $element), $key);
+            $data[] = $callback(
+                new WebDriverFilteredElement(
+                    remoteWebElement: $element,
+                    webDriver: $this->webDriver
+                ),
+                $key
+            );
         }
 
         return $data;
