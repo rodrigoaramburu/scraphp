@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace ScraPHP\HttpClient\Guzzle;
 
 use ScraPHP\Link;
+use ScraPHP\Image;
 use ScraPHP\HttpClient\FilteredElement;
 use Symfony\Component\DomCrawler\Crawler;
 use ScraPHP\Exceptions\InvalidLinkException;
+use ScraPHP\Exceptions\InvalidImageException;
 
 final class GuzzleFilteredElement implements FilteredElement
 {
@@ -56,6 +58,13 @@ final class GuzzleFilteredElement implements FilteredElement
     }
 
 
+    /**
+     * Gets a link from a element.
+     *
+     * @return Link The created link object.
+     *
+     * @throws InvalidLinkException If unable to get the link.
+     */
     public function link(): Link
     {
         $rawUri = $this->crawler->attr('href');
@@ -67,8 +76,33 @@ final class GuzzleFilteredElement implements FilteredElement
 
         return new Link(
             text: $this->crawler->text(),
-            rawUri: $this->crawler->attr('href'),
-            baseUri: $this->crawler->getUri()
+            rawUri: $rawUri,
+            baseUri: $baseUri
+        );
+    }
+
+    /**
+     * Gets the image from a element.
+     *
+     * @return Image The created image.
+     *
+     * @throws InvalidImageException If unable to get the image.
+     */
+    public function image(): Image
+    {
+        $rawUri = $this->crawler->attr('src');
+        $baseUri = $this->crawler->getUri();
+
+        if($rawUri === null || $baseUri === null) {
+            throw new InvalidImageException('Unable to get image');
+        }
+
+        return new Image(
+            rawUri: $rawUri,
+            baseUri: $baseUri,
+            alt: $this->crawler->attr('alt'),
+            width: intval($this->crawler->attr('width')),
+            height: intval($this->crawler->attr('height')),
         );
     }
 }

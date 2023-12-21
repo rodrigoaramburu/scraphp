@@ -5,6 +5,7 @@ declare(strict_types=1);
 use ScraPHP\HttpClient\FilteredElement;
 use ScraPHP\HttpClient\Guzzle\GuzzlePage;
 use ScraPHP\Exceptions\InvalidLinkException;
+use ScraPHP\Exceptions\InvalidImageException;
 
 test('have attributes', function () {
     $page = new GuzzlePage(
@@ -222,3 +223,35 @@ test('throw exception if link is invalid', function () {
     $link = $page->filterCSS('#not-link')->link();
 
 })->throws(InvalidLinkException::class);
+
+
+test('get a image data', function () {
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/folder1/folder2/image.html',
+        content: file_get_contents(__DIR__.'/../../test-pages/folder1/folder2/image.html'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    $link = $page->filterCSS('#img1')->image();
+
+    expect($link)
+        ->source()->toBe('http://localhost:8000/folder1/folder2/image.png')
+        ->rawUri()->toBe('http://localhost:8000/folder1/folder2/image.png')
+        ->alt()->toBe('Test Image')
+        ->width()->toBe(300)
+        ->height()->toBe(200);
+});
+
+test('throw exception if image is invalid', function () {
+
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/folder1/folder2/image.html',
+        content: file_get_contents(__DIR__.'/../../test-pages/folder1/folder2/image.html'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    $link = $page->filterCSS('#not-image')->image();
+
+})->throws(InvalidImageException::class);

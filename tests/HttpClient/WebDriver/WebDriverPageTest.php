@@ -5,6 +5,7 @@ declare(strict_types=1);
 use ScraPHP\HttpClient\FilteredElement;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use ScraPHP\Exceptions\InvalidLinkException;
+use ScraPHP\Exceptions\InvalidImageException;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use ScraPHP\HttpClient\WebDriver\WebDriverPage;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
@@ -277,3 +278,35 @@ test('throw exception if link is invalid', function () {
     $link = $page->filterCSS('#not-link')->link();
 
 })->throws(InvalidLinkException::class);
+
+
+test('get a image data', function () {
+    $this->webDriver->get('http://localhost:8000/folder1/folder2/image.html');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    $link = $page->filterCSS('#img1')->image();
+
+    expect($link)
+        ->source()->toBe('http://localhost:8000/folder1/folder2/image.png')
+        ->rawUri()->toBe('http://localhost:8000/folder1/folder2/image.png')
+        ->alt()->toBe('Test Image')
+        ->width()->toBe(300)
+        ->height()->toBe(200);
+});
+
+test('throw exception if image is invalid', function () {
+
+    $this->webDriver->get('http://localhost:8000/folder1/folder2/image.html');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    $link = $page->filterCSS('#not-image')->image();
+
+})->throws(InvalidImageException::class);
