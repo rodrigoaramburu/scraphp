@@ -22,16 +22,33 @@ final class WebDriverFilteredElement implements FilteredElement
     ) {
     }
 
+    /**
+     * Gets the text content of the element.
+     *
+     * @return string The text content of the element.
+     */
     public function text(): string
     {
         return $this->remoteWebElement->getText();
     }
 
+    /**
+     * Gets the value of the specified attribute of element.
+     *
+     * @param  string  $attr The name of the attribute to get.
+     * @return string|null The value of the specified attribute, or null if it does not exist.
+     */
     public function attr(string $attr): ?string
     {
         return $this->remoteWebElement->getAttribute($attr);
     }
 
+    /**
+     * Filters an element based on the given CSS selector.
+     *
+     * @param string $cssSelector The CSS selector to filter the elements.
+     * @return FilteredElement|null The filtered element or null if no element is found.
+     */
     public function filterCSS(string $cssSelector): ?FilteredElement
     {
         try {
@@ -48,6 +65,14 @@ final class WebDriverFilteredElement implements FilteredElement
         );
     }
 
+    /**
+     * Filters the elements using the given CSS selector and applies a callback function to each element.
+     *
+     * @param string $cssSelector The CSS selector used to filter the elements.
+     * @param callable $callback The callback function to be applied to each filtered element.
+
+     * @return array<int,mixed> An array containing the results of applying the callback function to each filtered element.
+     */
     public function filterCSSEach(string $cssSelector, callable $callback): array
     {
         $elements = $this->remoteWebElement->findElements(WebDriverBy::cssSelector($cssSelector));
@@ -68,16 +93,16 @@ final class WebDriverFilteredElement implements FilteredElement
 
 
     /**
-     * Gets a Link object based on the properties of the remote web element.
+     * Gets a Link object based on the element.
      *
-     * @return Link The Link object representing the remote web element.
+     * @return Link The Link object.
      */
     public function link(): Link
     {
         $rawUri = $this->remoteWebElement->getAttribute('href');
         $baseUri = $this->webDriver->getCurrentURL();
 
-        if($rawUri === null || $baseUri === null) {
+        if($rawUri === null) {
             throw new InvalidLinkException('Unable to get link');
         }
         return new Link(
@@ -89,10 +114,9 @@ final class WebDriverFilteredElement implements FilteredElement
 
 
     /**
-     * Retrieves an Image object representing the image associated with the remote web element.
+     * Gets an Image object based on the element.
      *
-     * @return Image An Image object containing information about the image, such as the raw URI,
-     *               base URI, alt text, width, and height.
+     * @return Image An Image object.
      * @throws InvalidImageException if unable to retrieve the image.
      */
     public function image(): Image
@@ -101,7 +125,7 @@ final class WebDriverFilteredElement implements FilteredElement
         $baseUri = $this->webDriver->getCurrentURL();
 
 
-        if($rawUri === null || $baseUri === null) {
+        if($rawUri === null) {
             throw new InvalidImageException('Unable to get image');
         }
 

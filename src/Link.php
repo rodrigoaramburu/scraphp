@@ -8,6 +8,13 @@ use Symfony\Component\DomCrawler\UriResolver;
 
 final class Link
 {
+    /**
+     * Constructs a new instance of the class.
+     *
+     * @param string $text The text of the link.
+     * @param string $rawUri The href attribute of the link .
+     * @param string|null $baseUri  The url of the page.
+     */
     public function __construct(
         private string $text,
         private string $rawUri,
@@ -27,9 +34,9 @@ final class Link
     }
 
     /**
-     * Returns the raw URI.
+     * Returns the href attribute.
      *
-     * @return string The raw URI.
+     * @return string The href attribute.
      */
     public function rawUri(): string
     {
@@ -37,7 +44,7 @@ final class Link
     }
 
     /**
-     * Gets the text of the link.
+     * Returns the text of the link.
      *
      * @return string The text stored in the object.
      */
@@ -47,9 +54,9 @@ final class Link
     }
 
     /**
-     * Get the query parameters from the link.
+     * Returns the query parameters from the link.
      *
-     * @return array The array containing the query parameters.
+     * @return array<string,string> The array containing the query parameters.
      */
     public function query(): array
     {

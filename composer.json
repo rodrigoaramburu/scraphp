@@ -35,6 +35,6 @@
         "lint": ["pint --preset=psr12"],
         "test": ["pest"],
         "test:lint": ["pint --preset=psr12 --test"],
-        "test:stan": ["phpstan analyse"]
+        "test:stan": ["phpstan analyse -l 6 src"]
     }
 }

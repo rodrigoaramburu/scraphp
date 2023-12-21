@@ -25,7 +25,7 @@ final class JsonWriter implements Writer
     /**
      * Writes data to a file in JSON format.
      *
-     * @param  array  $data The data to be written.
+     * @param  array<string, string>  $data The data to be written.
      */
     public function write(array $data): void
     {
@@ -38,7 +38,7 @@ final class JsonWriter implements Writer
     /**
      * Checks if the given search criteria exists in the JSON data.
      *
-     * @param  array  $search The search criteria to check.
+     * @param  array<string, mixed>  $search The search criteria to check.
      * @return bool Returns true if the search criteria exists in the JSON data, false otherwise.
      */
     public function exists(array $search): bool
@@ -78,6 +78,11 @@ final class JsonWriter implements Writer
     }
 
 
+    /**
+     * Get the filename of th e json file.
+     *
+     * @return string The filename.
+     */
     public function filename(): string
     {
         return $this->filename;

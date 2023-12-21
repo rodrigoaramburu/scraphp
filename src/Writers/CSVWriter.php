@@ -11,6 +11,7 @@ final class CSVWriter implements Writer
     private mixed $file;
 
     private string $filename;
+
     /**
      * The header to include in the file.
      *
@@ -23,7 +24,7 @@ final class CSVWriter implements Writer
     /**
      * Constructs a new instance of the class.
      *
-     * @param  string  $filename The name of the file to work with.
+     * @param  string  $filename The name of the file.
      * @param  array<string>  $header The header to include in the file.
      * @param  string  $separator The separator to use in the file.
      */
@@ -43,7 +44,7 @@ final class CSVWriter implements Writer
     /**
      * Writes an array of data to the file.
      *
-     * @param  array<string,string>  $data The data to be written.
+     * @param  array<string,mixed>  $data The data to be written.
      */
     public function write(array $data): void
     {
@@ -59,7 +60,9 @@ final class CSVWriter implements Writer
     /**
      * Checks if a record exists in the file based on a search criteria.
      *
-     * @param  array<string, string>  $search The search criteria to match against the records in the file.
+     * @param  array<string, mixed>  $search The search criteria to match against the records
+     *                               in the file.
+     *
      * @return bool Returns true if a record matching the search criteria is found, false otherwise.
      */
     public function exists(array $search): bool
@@ -86,7 +89,8 @@ final class CSVWriter implements Writer
      * Determines if the given data matches the search criteria.
      *
      * @param  array<string>  $data The data to be checked.
-     * @param  array<string, string>  $search The search criteria.
+     * @param  array<string, mixed>  $search The search criteria.
+     *
      * @return bool Returns true if the data matches the search criteria, and false otherwise.
      */
     private function matchCriteria(array $data, array $search): bool
@@ -133,6 +137,7 @@ final class CSVWriter implements Writer
      * Orders the data based on the header.
      *
      * @param  array<string>  $data The data to be ordered.
+     *
      * @return array<string> The ordered data.
      */
     public function orderData(array $data): array
@@ -147,6 +152,8 @@ final class CSVWriter implements Writer
 
     /**
      * Destructor method for the class.
+     *
+     * closes the file
      */
     public function __destruct()
     {
@@ -166,7 +173,7 @@ final class CSVWriter implements Writer
     /**
      * Gets the headers array of the file.
      *
-     * @return array The header array.
+     * @return array<string> The header array.
      */
     public function header(): array
     {

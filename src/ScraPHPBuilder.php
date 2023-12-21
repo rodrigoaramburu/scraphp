@@ -30,10 +30,11 @@ final class ScraPHPBuilder
     private int $retryTime = 30;
 
     /**
-     * Sets the HttpClient for the object and returns itself.
+     * Sets the HttpClient and returns itself.
      *
      * @param  HttpClient  $httpClient The HttpClient to be set.
-     * @return self The updated object.
+     *
+     * @return self Returns the current object instance.
      */
     public function withHttpClient(HttpClient $httpClient): self
     {
@@ -47,6 +48,7 @@ final class ScraPHPBuilder
      * will be create a Logger to this file.
      *
      * @param  LoggerInterface|string  $logger The logger to be set for the object.
+     *
      * @return self Returns the current object instance.
      */
     public function withLogger(LoggerInterface|string $logger): self
@@ -63,10 +65,11 @@ final class ScraPHPBuilder
     }
 
     /**
-     * Sets the writer for the object.
+     * Sets the writer.
      *
      * @param  Writer  $writer The writer object to be set.
-     * @return self The modified object with the new writer.
+     *
+     * @return self Returns the current object instance.
      */
     public function withWriter(Writer $writer): self
     {
@@ -79,6 +82,8 @@ final class ScraPHPBuilder
      * Sets the retry count.
      *
      * @param  int  $retryCount The number of times the function should be retried.
+     *
+     * @return self Returns the current object instance.
      */
     public function withRetryCount(int $retryCount): self
     {
@@ -91,7 +96,8 @@ final class ScraPHPBuilder
      * Sets the retry time.
      *
      * @param  int  $retryTime The retry time in milliseconds.
-     * @return self The current instance of the class.
+     *
+     * @return self Returns the current object instance.
      */
     public function withRetryTime(int $retryTime): self
     {
@@ -114,10 +120,11 @@ final class ScraPHPBuilder
     }
 
     /**
-     * Sets the writer of the object to an instance of JsonWriter with the specified filename.
+     * Sets the JsonWriter with the specified filename.
      *
      * @param string $filename The name of the file to write JSON data to.
-     * @return self Returns the modified object with the new writer.
+     *
+     * @return self Returns the current object instance.
      */
     public function withJsonWriter(string $filename): self
     {
@@ -126,10 +133,12 @@ final class ScraPHPBuilder
     }
 
     /**
-     * Sets the CSV writer for the object and returns the object itself.
+     * Sets the CSVWriter writer with the specified filename headers and delimiter.
      *
      * @param string $filename The name of the CSV file.
-     * @return self The object with the CSV writer set.
+     * @param array<string> $headers The headers of the CSV file.
+     *
+     * @return self Returns the current object instance.
      */
     public function withCSVWriter(
         string $filename,
@@ -140,6 +149,14 @@ final class ScraPHPBuilder
         return $this;
     }
 
+    /**
+     * Sets the DatabaseWriter writer.
+     *
+     * @param \PDO $pdo The PDO object to write to the database.
+     * @param string $table The name of the table to write to.
+     *
+     * @return self Returns the current object instance.
+     */
     public function withDatabaseWriter(\PDO $pdo, string $table): self
     {
         $this->writer = new DatabaseWriter($pdo, $table);
@@ -148,6 +165,8 @@ final class ScraPHPBuilder
 
     /**
      * Create a new instance of the ScraPHP class.
+     *
+     * @return ScraPHP The initialized ScraPHP object.
      */
     public function create(): ScraPHP
     {
@@ -177,9 +196,9 @@ final class ScraPHPBuilder
      * Initializes the logger.
      *
      * @param  string  $logfile The path to the log file.
+     *
      * @return LoggerInterface The initialized logger.
      *
-     * @throws Exception If there is an error initializing the logger.
      */
     private function createDefaultLogger(string $logfile): LoggerInterface
     {

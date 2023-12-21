@@ -38,6 +38,12 @@ final class GuzzleFilteredElement implements FilteredElement
         return $this->crawler->attr($attr);
     }
 
+    /**
+     * Filters an element based on the given CSS selector.
+     *
+     * @param string $cssSelector The CSS selector to filter the elements.
+     * @return FilteredElement|null The filtered element or null if no element is found.
+     */
     public function filterCSS(string $cssSelector): ?FilteredElement
     {
         $crawler = $this->crawler->filter($cssSelector);
@@ -48,6 +54,15 @@ final class GuzzleFilteredElement implements FilteredElement
         return new GuzzleFilteredElement(crawler: $crawler);
     }
 
+    /**
+     * Filters the elements using the given CSS selector and applies a callback function
+     *  to each element.
+     *
+     * @param string $cssSelector The CSS selector used to filter the elements.
+     * @param callable $callback The callback function to be applied to each filtered element.
+
+     * @return array<int,mixed> An array containing the results of applying the callback function to each filtered element.
+     */
     public function filterCSSEach(string $cssSelector, callable $callback): array
     {
         $filter = $this->crawler->filter($cssSelector);
@@ -59,7 +74,7 @@ final class GuzzleFilteredElement implements FilteredElement
 
 
     /**
-     * Gets a link from a element.
+     * Gets a link object from a element.
      *
      * @return Link The created link object.
      *
@@ -82,7 +97,7 @@ final class GuzzleFilteredElement implements FilteredElement
     }
 
     /**
-     * Gets the image from a element.
+     * Gets a image object from a element.
      *
      * @return Image The created image.
      *

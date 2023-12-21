@@ -16,16 +16,22 @@ use ScraPHP\Writers\Writer;
 
 final class ScraPHP
 {
+    /**
+     * @var array<string, Closure|ProcessPage> The list of URL errors.
+     */
     private array $urlErrors = [];
 
+    /**
+     * @var array<string, Closure|ProcessPage> The list of assets errors.
+     */
     private array $assetErrors = [];
 
     /**
      * Constructs a new instance of the class.
      *
-     * @param  HttpClient  $httpClient The HTTP client to use.
-     * @param  LoggerInterface  $logger The logger to use.
-     * @param  Writer  $writer The writer to use.
+     * @param  HttpClient  $httpClient The HTTP client.
+     * @param  LoggerInterface  $logger The logger.
+     * @param  Writer  $writer The writer.
      * @param  int  $retryCount The number of times to retry.
      * @param  int  $retryTime The time to wait between retries.
      */
@@ -43,7 +49,8 @@ final class ScraPHP
      * function with the page object.
      *
      * @param  string  $url The URL to send the GET request to.
-     * @param  callable|ProcessPage  $callback The callback function or class ProcessPage to invoke with the response body.
+     * @param  Closure|ProcessPage  $callback The Closure function or class ProcessPage to invoke with
+     *      the Page object representing the retrieved web page.
      * @return self Returns an instance of the current class.
      *
      * @throws UrlNotFoundException If the URL could not be found.
@@ -76,6 +83,7 @@ final class ScraPHP
      * @return Page The retrieved page.
      *
      * @throws HttpClientException If an error occurs while making the HTTP request.
+     * @throws UrlNotFoundException If the URL could not be found.
      */
     private function tryGetPage(string $url): ?Page
     {
@@ -159,6 +167,7 @@ final class ScraPHP
      * @param  string  $url The URL of the asset.
      * @return string The fetched asset.
      *
+     * @throws AssetNotFoundException If the asset could not be found.
      * @throws HttpClientException If an error occurs during the HTTP request.
      */
     private function tryGetAsset(string $url): ?string
@@ -201,9 +210,9 @@ final class ScraPHP
     /**
      * Gets the logger object.
      *
-     * @return Logger The logger object.
+     * @return LoggerInterface The logger object.
      */
-    public function logger(): Logger
+    public function logger(): LoggerInterface
     {
         return $this->logger;
     }
@@ -241,7 +250,7 @@ final class ScraPHP
     /**
      * Gets the list of URL errors.
      *
-     * @return array The list of URL errors.
+     * @return array<string, Closure|ProcessPage> The list of URL errors.
      */
     public function urlErrors(): array
     {
@@ -251,7 +260,7 @@ final class ScraPHP
     /**
      * Gets the list of asset errors.
      *
-     * @return array The list of asset errors.
+     * @return array<string, Closure|ProcessPage> The list of asset errors.
      */
     public function assetErrors(): array
     {

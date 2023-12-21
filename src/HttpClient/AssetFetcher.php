@@ -30,6 +30,7 @@ final class AssetFetcher
     {
         try {
             $response = $this->client->request('GET', $url);
+            return $response->getBody()->getContents();
         } catch (ClientException $e) {
             if ($e->getCode() === 404) {
                 throw new AssetNotFoundException($url.' not found');
@@ -37,7 +38,6 @@ final class AssetFetcher
         } catch (ConnectException $e) {
             throw new HttpClientException($e->getMessage(), $e->getCode(), $e);
         }
-
-        return $response->getBody()->getContents();
+        return '';
     }
 }

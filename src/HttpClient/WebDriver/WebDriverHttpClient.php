@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace ScraPHP\HttpClient\WebDriver;
 
 use Exception;
-use Facebook\WebDriver\Chrome\ChromeOptions;
-use Facebook\WebDriver\Exception\NoSuchElementException;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Facebook\WebDriver\WebDriverBy;
-use Psr\Log\LoggerInterface;
-use ScraPHP\Exceptions\HttpClientException;
-use ScraPHP\Exceptions\UrlNotFoundException;
-use ScraPHP\HttpClient\AssetFetcher;
-use ScraPHP\HttpClient\HttpClient;
 use ScraPHP\HttpClient\Page;
+use ScraPHP\HttpClient\HttpClient;
+use Facebook\WebDriver\WebDriverBy;
+use ScraPHP\HttpClient\AssetFetcher;
+use ScraPHP\Exceptions\HttpClientException;
+use Facebook\WebDriver\Chrome\ChromeOptions;
+use ScraPHP\Exceptions\UrlNotFoundException;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use ScraPHP\Exceptions\AssetNotFoundException;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Exception\NoSuchElementException;
 
 final class WebDriverHttpClient implements HttpClient
 {
@@ -24,12 +24,13 @@ final class WebDriverHttpClient implements HttpClient
     private AssetFetcher $assetFetcher;
 
     /**
-     * Constructor for the class.
+     * Constructs a new instance of the class.
      *
-     * @param  LoggerInterface  $logger The logger instance.
+     * @param string $webDriverUrl The URL of the WebDriver (default: 'http://localhost:4444')
+     *
      */
     public function __construct(
-        private $webDriverUrl = 'http://localhost:4444'
+        string $webDriverUrl = 'http://localhost:4444'
     ) {
         $chromeOptions = new ChromeOptions();
         $chromeOptions->addArguments(['-headless']);
@@ -45,9 +46,7 @@ final class WebDriverHttpClient implements HttpClient
     /**
      * Destructor method for the class.
      *
-     * This method is automatically called when the object is no longer referenced
-     * and is about to be destroyed. It is responsible for closing any open resources
-     * or connections and performing any necessary cleanup operations.
+     * Closes the WebDriver.
      */
     public function __destruct()
     {
@@ -58,12 +57,12 @@ final class WebDriverHttpClient implements HttpClient
      * Retrieves a web page using the specified URL and returns a Page object.
      *
      * @param  string  $url The URL of the web page to retrieve.
-     * @return Page The Page object representing the retrieved web page.
+     * @return ?Page The Page object representing the retrieved web page.
      *
-     * @throws HttpClient An exception that is thrown when an error occurs while accessing the URL.
      * @throws UrlNotFoundException An exception that is thrown when the web page is not found (404 error).
+     * @throws HttpClientException If an error occurs during the HTTP request.
      */
-    public function get(string $url): Page
+    public function get(string $url): ?Page
     {
 
         try {
