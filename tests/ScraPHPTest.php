@@ -142,6 +142,36 @@ test('call save asset with default filename', function () {
     expect(file_get_contents($file))->toBe('Hello World');
 });
 
+test('call save asset to save in a relative path  ', function () {
+    $this->httpClient
+        ->shouldReceive('fetchAsset')
+        ->once()
+        ->with('https://localhost:8000/texto.txt')
+        ->andReturn('Hello World');
+
+    $this->logger
+        ->shouldReceive('info')
+        ->once()
+        ->with('Fetching asset: https://localhost:8000/texto.txt');
+
+    $this->logger
+        ->shouldReceive('info')
+        ->once()
+        ->with('Fetched: https://localhost:8000/texto.txt');
+
+    chdir(__DIR__ );
+    $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', 'assets');
+
+    expect($file)->toBeFile();
+    expect(file_get_contents($file))->toBe('Hello World');
+});
+
+test('throw exception if path is not a directory', function () {
+    
+    $this->scraphp->saveAsset('https://localhost:8000/texto.txt', 'not-found-dir');
+
+})->throws(Exception::class, 'not-found-dir is not a directory');
+
 test('call save asset with custom filename', function () {
 
     $this->httpClient
@@ -165,6 +195,8 @@ test('call save asset with custom filename', function () {
     expect($file)->toBeFile();
     expect(file_get_contents($file))->toBe('Hello World');
 });
+
+
 
 test('call class ProcessPage', function () {
 
@@ -329,9 +361,11 @@ test('save a failed url asset tried 3 times on saveAsset', function () {
 
     $this->logger->shouldReceive('error');
     $this->logger->shouldReceive('info');
-
-    $scraphp->saveAsset('http://localhost:8000/teste.jpg', 'teste.jpg');
+    
+    $scraphp->saveAsset('http://localhost:8000/teste.jpg', __DIR__.'/assets' ,'teste.jpg');
 
     expect($scraphp->assetErrors()[0]['url'])->toContain('http://localhost:8000/teste.jpg');
 
 });
+
+

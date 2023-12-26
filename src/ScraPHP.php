@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ScraPHP;
 
 use Closure;
+use Exception;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use ScraPHP\Exceptions\AssetNotFoundException;
@@ -143,15 +144,19 @@ final class ScraPHP
      */
     public function saveAsset(string $url, string $path, string $filename = null): ?string
     {
+        if(!is_dir($path)){
+            throw new Exception($path .' is not a directory');
+        }
 
         try {
             $content = $this->tryGetAsset($url);
             if ($filename === null) {
                 $filename = basename($url);
             }
-            file_put_contents($path.$filename, $content);
 
-            return $path.$filename;
+            file_put_contents($path . '/' . $filename, $content);
+
+            return $path. '/' .$filename;
 
         } catch (HttpClientException $e) {
             $this->assetErrors[] = ['url' => $url];
