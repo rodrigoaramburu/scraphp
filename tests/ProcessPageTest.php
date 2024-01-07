@@ -35,14 +35,6 @@ test('bind scraphp methods to instance', function () {
         ->once()
         ->andReturn($page);
 
-    $logger->shouldReceive('info')
-        ->once()
-        ->with('Accessing http://localhost:8000/hello-world.php');
-
-    $logger->shouldReceive('info')
-        ->once()
-        ->with('Status: 200 http://localhost:8000/hello-world.php');
-
     $pp->withScraPHP($scraphp);
 
     $pp->go('http://localhost:8000/hello-world.php', function (Page $page) {

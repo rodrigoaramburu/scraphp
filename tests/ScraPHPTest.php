@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Psr\Log\LoggerInterface;
-use ScraPHP\Exceptions\HttpClientException;
-use ScraPHP\HttpClient\Guzzle\GuzzlePage;
-use Scraphp\HttpClient\HttpClient;
-use ScraPHP\HttpClient\Page;
-use ScraPHP\ProcessPage;
 use ScraPHP\ScraPHP;
+use ScraPHP\ProcessPage;
 use ScraPHP\Writers\Writer;
+use Psr\Log\LoggerInterface;
+use ScraPHP\HttpClient\Page;
+use ScraPHP\Midleware\Middleware;
+use Scraphp\HttpClient\HttpClient;
+use ScraPHP\HttpClient\Guzzle\GuzzlePage;
 
 beforeEach(function () {
     $this->httpClient = Mockery::mock(HttpClient::class);
@@ -49,14 +49,6 @@ test('go to a page and return the body', function () {
             url: 'https://localhost:8000/teste.html'
         ));
 
-    $this->logger
-        ->shouldReceive('info')
-        ->with('Accessing https://localhost:8000/teste.html');
-
-    $this->logger
-        ->shouldReceive('info')
-        ->with('Status: 200 https://localhost:8000/teste.html');
-
     $this->scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
         expect($page)->toBeInstanceOf(Page::class)
             ->htmlBody()->toBe('<h1>Hello World</h1>')
@@ -80,14 +72,6 @@ test('bind the context if the callback is a closure', function () {
             url: 'https://localhost:8000/teste.html'
         ));
 
-    $this->logger
-        ->shouldReceive('info')
-        ->with('Accessing https://localhost:8000/teste.html');
-
-    $this->logger
-        ->shouldReceive('info')
-        ->with('Status: 200 https://localhost:8000/teste.html');
-
     $this->scraphp->go('https://localhost:8000/teste.html', function (Page $page) {
         expect($this)->toBeInstanceOf(ScraPHP::class);
     });
@@ -101,16 +85,6 @@ test('call fetch an asset from httpClient', function () {
         ->once()
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
-
-    $this->logger
-        ->shouldReceive('info')
-        ->once()
-        ->with('Fetching asset: https://localhost:8000/texto.txt');
-
-    $this->logger
-        ->shouldReceive('info')
-        ->once()
-        ->with('Fetched: https://localhost:8000/texto.txt');
 
     $content = $this->scraphp->fetchAsset('https://localhost:8000/texto.txt');
 
@@ -126,16 +100,6 @@ test('call save asset with default filename', function () {
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-    $this->logger
-        ->shouldReceive('info')
-        ->once()
-        ->with('Fetching asset: https://localhost:8000/texto.txt');
-
-    $this->logger
-        ->shouldReceive('info')
-        ->once()
-        ->with('Fetched: https://localhost:8000/texto.txt');
-
     $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__.'/assets/');
 
     expect($file)->toBeFile();
@@ -149,17 +113,7 @@ test('call save asset to save in a relative path  ', function () {
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-    $this->logger
-        ->shouldReceive('info')
-        ->once()
-        ->with('Fetching asset: https://localhost:8000/texto.txt');
-
-    $this->logger
-        ->shouldReceive('info')
-        ->once()
-        ->with('Fetched: https://localhost:8000/texto.txt');
-
-    chdir(__DIR__ );
+    chdir(__DIR__);
     $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', 'assets');
 
     expect($file)->toBeFile();
@@ -167,7 +121,7 @@ test('call save asset to save in a relative path  ', function () {
 });
 
 test('throw exception if path is not a directory', function () {
-    
+
     $this->scraphp->saveAsset('https://localhost:8000/texto.txt', 'not-found-dir');
 
 })->throws(Exception::class, 'not-found-dir is not a directory');
@@ -180,17 +134,11 @@ test('call save asset with custom filename', function () {
         ->with('https://localhost:8000/texto.txt')
         ->andReturn('Hello World');
 
-    $this->logger
-        ->shouldReceive('info')
-        ->once()
-        ->with('Fetching asset: https://localhost:8000/texto.txt');
-
-    $this->logger
-        ->shouldReceive('info')
-        ->once()
-        ->with('Fetched: https://localhost:8000/texto.txt');
-
-    $file = $this->scraphp->saveAsset('https://localhost:8000/texto.txt', __DIR__.'/assets/', 'my-filename.txt');
+    $file = $this->scraphp->saveAsset(
+        'https://localhost:8000/texto.txt',
+        __DIR__.'/assets/',
+        'my-filename.txt'
+    );
 
     expect($file)->toBeFile();
     expect(file_get_contents($file))->toBe('Hello World');
@@ -199,14 +147,6 @@ test('call save asset with custom filename', function () {
 
 
 test('call class ProcessPage', function () {
-
-    $this->logger
-        ->shouldReceive('info')
-        ->with('Accessing https://localhost:8000/teste.html');
-
-    $this->logger
-        ->shouldReceive('info')
-        ->with('Status: 200 https://localhost:8000/teste.html');
 
     $this->httpClient->shouldReceive('get')
         ->andReturn(new GuzzlePage(
@@ -224,148 +164,170 @@ test('call class ProcessPage', function () {
 
 });
 
-test('retry get a url after a failed', function () {
+test('execute middleware with go', function () {
 
-    $this->httpClient
-        ->shouldReceive('get')
-        ->times(3)
-        ->andReturnUsing(function () {
-            static $counter = 0;
-            if ($counter < 2) {
-                $counter++;
-                throw new HttpClientException('test');
-            }
+    $page = Mockery::mock(Page::class);
+    $page
+        ->shouldReceive('statusCode')
+        ->once()
+        ->andReturn(200);
 
+    $this->httpClient->shouldReceive('get')
+        ->once()
+        ->with('http://www.example.com')
+        ->andReturn($page);
+
+
+    $this->scraphp->addMidleware(new class () extends Middleware {
+        public function processGo(string $url, $handler): Page
+        {
+            $page = $handler($url);
+            expect($page->statusCode())->toBe(200);
+            return $page;
+        }
+    });
+
+    $this->scraphp->go('http://www.example.com', function ($pageR) use ($page) {
+        expect($pageR)->toBe($page);
+    });
+
+});
+
+
+
+test('execute two middlewares with go in sequence', function () {
+
+    $page = Mockery::mock(Page::class);
+    $page
+        ->shouldReceive('htmlBody')
+        ->andReturn('page-content');
+
+    $this->httpClient->shouldReceive('get')
+        ->once()
+        ->with('http://www.example.com')
+        ->andReturn($page);
+
+
+    $this->scraphp->addMidleware(new class () extends Middleware {
+        public function processGo(string $url, $handler): Page
+        {
+            $page = $handler($url);
             return new GuzzlePage(
-                content: '<h1>Hello World</h1>',
+                content: $page ->htmlBody().'-middleware1',
                 statusCode: 200,
                 headers: [],
-                url: 'https://localhost:8000/teste.html'
+                url: 'http://www.example.com'
             );
-        });
-
-    $scraphp = new ScraPHP(
-        httpClient: $this->httpClient,
-        logger: $this->logger,
-        writer: $this->writer,
-        retryCount: 3,
-        retryTime: 1
-    );
-
-    $this->logger->shouldReceive('error');
-    $this->logger->shouldReceive('info');
-
-    $scraphp->go('http://localhost:8000/teste.html', function (Page $page) {
-
+        }
+    });
+    $this->scraphp->addMidleware(new class () extends Middleware {
+        public function processGo(string $url, $handler): Page
+        {
+            $page = $handler($url);
+            return new GuzzlePage(
+                content: $page ->htmlBody().'-middleware2',
+                statusCode: 200,
+                headers: [],
+                url: 'http://www.example.com'
+            );
+        }
     });
 
-    expect($scraphp->urlErrors())->toHaveCount(0);
-});
-
-test('save a failed url and its processor after tried 3 times', function () {
-
-    $this->httpClient
-        ->shouldReceive('get')
-        ->times(3)
-        ->andThrows(new HttpClientException('test'));
-
-    $scraphp = new ScraPHP(
-        httpClient: $this->httpClient,
-        logger: $this->logger,
-        writer: $this->writer,
-        retryCount: 3,
-        retryTime: 1
-    );
-
-    $this->logger->shouldReceive('error');
-    $this->logger->shouldReceive('info');
-
-    $scraphp->go('http://localhost:8000/teste.html', function (Page $page) {
-
+    $this->scraphp->go('http://www.example.com', function ($page) {
+        expect($page->htmlBody())->toBe('page-content-middleware2-middleware1');
     });
 
-    expect($scraphp->urlErrors()[0]['url'])->toContain('http://localhost:8000/teste.html');
-    expect($scraphp->urlErrors()[0]['pageProcessor'])->toBeInstanceOf(Closure::class);
 });
 
-test('retry get an asset if its fail', function () {
 
-    $this->httpClient
-        ->shouldReceive('fetchAsset')
-        ->times(3)
-        ->andReturnUsing(function () {
-            static $counter = 0;
-            if ($counter < 2) {
-                $counter++;
-                throw new HttpClientException('test');
-            }
+test('access httpClient and logger objects inside the middleware', function () {
 
-            return 'ABC';
-        });
+    $page = Mockery::mock(Page::class);
 
-    $scraphp = new ScraPHP(
-        httpClient: $this->httpClient,
-        logger: $this->logger,
-        writer: $this->writer,
-        retryCount: 3,
-        retryTime: 1
+    $this->httpClient->shouldReceive('get')
+        ->once()
+        ->with('http://www.example.com')
+        ->andReturn($page);
+
+
+    $this->scraphp->addMidleware(new class () extends Middleware {
+        public function processGo(string $url, $handler): Page
+        {
+            expect($this->httpClient())->toBeInstanceOf(HttpClient::class);
+            expect($this->logger())->toBeInstanceOf(LoggerInterface::class);
+            return $handler($url);
+        }
+    });
+
+    $this->scraphp->go('http://www.example.com', function ($pageR) use ($page) {
+        expect($pageR)->toBe($page);
+    });
+});
+
+
+test('execute middleware with fetchAsset', function () {
+
+    $this->httpClient->shouldReceive('fetchAsset')
+        ->once()
+        ->with('http://www.example.com/teste.jpg')
+        ->andReturn('ASDF');
+
+    $this->scraphp->addMidleware(new class () extends Middleware {
+        public function processFetchAsset(string $url, closure $handler): string
+        {
+            $handler($url);
+            return "FDSA";
+        }
+    });
+
+    $asset = $this->scraphp->fetchAsset('http://www.example.com/teste.jpg');
+
+    expect($asset)->toBe('FDSA');
+
+});
+
+
+
+test('execute middleware with saveAsset', function () {
+
+    $this->httpClient->shouldReceive('fetchAsset')
+        ->once()
+        ->with('https://localhost:8000/texto.txt')
+        ->andReturn('ASDF');
+
+    $this->scraphp->addMidleware(new class () extends Middleware {
+        public function processSaveAsset(string $url, string $path, ?string $filename = null, closure $handler): string
+        {
+            $file = $handler($url, $path, $filename);
+            return $file.'-middleware';
+        }
+    });
+
+    $asset = $this->scraphp->saveAsset(
+        'https://localhost:8000/texto.txt',
+        __DIR__.'/assets/',
+        'my-filename.txt'
     );
 
-    $this->logger->shouldReceive('error');
-    $this->logger->shouldReceive('info');
-
-    $scraphp->fetchAsset('https://localhost:8000/teste.jpg');
-
-    expect($scraphp->assetErrors())->toHaveCount(0);
-
-});
-
-test('save a failed url asset tried 3 times', function () {
-
-    $this->httpClient
-        ->shouldReceive('fetchAsset')
-        ->times(3)
-        ->andThrows(new HttpClientException('test'));
-
-    $scraphp = new ScraPHP(
-        httpClient: $this->httpClient,
-        logger: $this->logger,
-        writer: $this->writer,
-        retryCount: 3,
-        retryTime: 1
-    );
-
-    $this->logger->shouldReceive('error');
-    $this->logger->shouldReceive('info');
-
-    $scraphp->fetchAsset('http://localhost:8000/teste.jpg');
-
-    expect($scraphp->assetErrors()[0]['url'])->toContain('http://localhost:8000/teste.jpg');
-
-});
-
-test('save a failed url asset tried 3 times on saveAsset', function () {
-
-    $this->httpClient
-        ->shouldReceive('fetchAsset')
-        ->times(3)
-        ->andThrows(new HttpClientException('test'));
-
-    $scraphp = new ScraPHP(
-        httpClient: $this->httpClient,
-        logger: $this->logger,
-        writer: $this->writer,
-        retryCount: 3,
-        retryTime: 1
-    );
-
-    $this->logger->shouldReceive('error');
-    $this->logger->shouldReceive('info');
-    
-    $scraphp->saveAsset('http://localhost:8000/teste.jpg', __DIR__.'/assets' ,'teste.jpg');
-
-    expect($scraphp->assetErrors()[0]['url'])->toContain('http://localhost:8000/teste.jpg');
+    expect($asset)->toBe(__DIR__.'/assets//my-filename.txt-middleware');
 
 });
 
 
+test('execute middleware with go without override processGo', function () {
+
+    $page = Mockery::mock(Page::class);
+
+    $this->httpClient->shouldReceive('get')
+        ->once()
+        ->with('http://www.example.com')
+        ->andReturn($page);
+
+
+    $this->scraphp->addMidleware(new class () extends Middleware {
+    });
+
+    $this->scraphp->go('http://www.example.com', function ($pageR) use ($page) {
+        expect($pageR)->toBe($page);
+    });
+});

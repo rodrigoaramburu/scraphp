@@ -31,8 +31,6 @@ test('create a scraphp instance with attributes', function () {
     expect($scraphp->httpClient())->toBeInstanceOf(GuzzleHttpClient::class);
     expect($scraphp->logger())->toBeInstanceOf(Logger::class);
     expect($scraphp->writer())->toBeInstanceOf(JsonWriter::class);
-    expect($scraphp->retryCount())->toBe(3);
-    expect($scraphp->retryTime())->toBe(30);
 
 });
 
@@ -65,17 +63,6 @@ test('create a scraphp instance passing a filename for the logger', function () 
     expect($filename)->toEndWith('test.log');
 
 });
-
-test('pass retryTime and retryCount', function () {
-    $scraphp = ScraPHP::build()
-        ->withRetryTime(15)
-        ->withRetryCount(5)
-        ->create();
-
-    expect($scraphp->retryTime())->toBe(15);
-    expect($scraphp->retryCount())->toBe(5);
-});
-
 
 test('create a scraphp instance with webdriver', function () {
 

@@ -16,6 +16,7 @@ use ScraPHP\Writers\DatabaseWriter;
 use Monolog\Formatter\LineFormatter;
 use ScraPHP\HttpClient\Guzzle\GuzzleHttpClient;
 use ScraPHP\HttpClient\WebDriver\WebDriverHttpClient;
+use ScraPHP\Midleware\Middleware;
 
 final class ScraPHPBuilder
 {
@@ -25,9 +26,10 @@ final class ScraPHPBuilder
 
     private ?Writer $writer = null;
 
-    private int $retryCount = 3;
-
-    private int $retryTime = 30;
+    /**
+     * @var array<Middleware>
+     */
+    private array $middlewares = [];
 
     /**
      * Sets the HttpClient and returns itself.
@@ -78,33 +80,6 @@ final class ScraPHPBuilder
         return $this;
     }
 
-    /**
-     * Sets the retry count.
-     *
-     * @param  int  $retryCount The number of times the function should be retried.
-     *
-     * @return self Returns the current object instance.
-     */
-    public function withRetryCount(int $retryCount): self
-    {
-        $this->retryCount = $retryCount;
-
-        return $this;
-    }
-
-    /**
-     * Sets the retry time.
-     *
-     * @param  int  $retryTime The retry time in milliseconds.
-     *
-     * @return self Returns the current object instance.
-     */
-    public function withRetryTime(int $retryTime): self
-    {
-        $this->retryTime = $retryTime;
-
-        return $this;
-    }
 
     /**
      * Create a web driver client for the ScraPHP class.
@@ -163,6 +138,13 @@ final class ScraPHPBuilder
         return $this;
     }
 
+    
+    public function withMiddleware(Middleware $middleware): self
+    {
+        $this->middlewares[] = $middleware;
+        return $this;
+    }
+
     /**
      * Create a new instance of the ScraPHP class.
      *
@@ -183,13 +165,17 @@ final class ScraPHPBuilder
             ? new GuzzleHttpClient()
             : $this->httpClient;
 
-        return new ScraPHP(
+        $scraphp = new ScraPHP(
             httpClient: $httpClient,
             logger: $logger,
-            writer: $writer,
-            retryCount: $this->retryCount,
-            retryTime: $this->retryTime
+            writer: $writer
         );
+
+        foreach($this->middlewares as $middleware){
+            $scraphp->addMidleware($middleware);
+        }
+
+        return $scraphp;
     }
 
     /**
