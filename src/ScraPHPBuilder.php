@@ -138,7 +138,7 @@ final class ScraPHPBuilder
         return $this;
     }
 
-    
+
     public function withMiddleware(Middleware $middleware): self
     {
         $this->middlewares[] = $middleware;
@@ -171,7 +171,7 @@ final class ScraPHPBuilder
             writer: $writer
         );
 
-        foreach($this->middlewares as $middleware){
+        foreach($this->middlewares as $middleware) {
             $scraphp->addMidleware($middleware);
         }
 
