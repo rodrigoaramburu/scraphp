@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ScraPHP\Writers;
 
-final class JsonWriter extends Writer
+final class JsonWriter implements Writer
 {
     private string $filename;
 
@@ -25,7 +25,7 @@ final class JsonWriter extends Writer
     /**
      * Writes data to a file in JSON format.
      *
-     * @param  array  $data The data to be written.
+     * @param  array<string, string>  $data The data to be written.
      */
     public function write(array $data): void
     {
@@ -33,14 +33,12 @@ final class JsonWriter extends Writer
         $jsonData = json_decode($json, true);
         $jsonData[] = $data;
         file_put_contents($this->filename, json_encode($jsonData, JSON_PRETTY_PRINT));
-
-        $this->logger()->info('Saved data: '.json_encode($data));
     }
 
     /**
      * Checks if the given search criteria exists in the JSON data.
      *
-     * @param  array  $search The search criteria to check.
+     * @param  array<string, mixed>  $search The search criteria to check.
      * @return bool Returns true if the search criteria exists in the JSON data, false otherwise.
      */
     public function exists(array $search): bool
@@ -77,5 +75,16 @@ final class JsonWriter extends Writer
         }
 
         return $flag;
+    }
+
+
+    /**
+     * Get the filename of th e json file.
+     *
+     * @return string The filename.
+     */
+    public function filename(): string
+    {
+        return $this->filename;
     }
 }

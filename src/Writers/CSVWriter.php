@@ -6,9 +6,11 @@ namespace ScraPHP\Writers;
 
 use Exception;
 
-final class CSVWriter extends Writer
+final class CSVWriter implements Writer
 {
     private mixed $file;
+
+    private string $filename;
 
     /**
      * The header to include in the file.
@@ -22,12 +24,13 @@ final class CSVWriter extends Writer
     /**
      * Constructs a new instance of the class.
      *
-     * @param  string  $filename The name of the file to work with.
+     * @param  string  $filename The name of the file.
      * @param  array<string>  $header The header to include in the file.
      * @param  string  $separator The separator to use in the file.
      */
     public function __construct(string $filename, array $header = [], string $separator = ',')
     {
+        $this->filename = $filename;
         $this->header = $header;
         $this->separator = $separator;
         if (file_exists($filename)) {
@@ -41,7 +44,7 @@ final class CSVWriter extends Writer
     /**
      * Writes an array of data to the file.
      *
-     * @param  array<string,string>  $data The data to be written.
+     * @param  array<string,mixed>  $data The data to be written.
      */
     public function write(array $data): void
     {
@@ -52,13 +55,14 @@ final class CSVWriter extends Writer
         }
 
         fwrite($this->file, "\n".implode($this->separator, $orderedData));
-        $this->logger()->info('Saved data: '.json_encode($orderedData));
     }
 
     /**
      * Checks if a record exists in the file based on a search criteria.
      *
-     * @param  array<string, string>  $search The search criteria to match against the records in the file.
+     * @param  array<string, mixed>  $search The search criteria to match against the records
+     *                               in the file.
+     *
      * @return bool Returns true if a record matching the search criteria is found, false otherwise.
      */
     public function exists(array $search): bool
@@ -85,7 +89,8 @@ final class CSVWriter extends Writer
      * Determines if the given data matches the search criteria.
      *
      * @param  array<string>  $data The data to be checked.
-     * @param  array<string, string>  $search The search criteria.
+     * @param  array<string, mixed>  $search The search criteria.
+     *
      * @return bool Returns true if the data matches the search criteria, and false otherwise.
      */
     private function matchCriteria(array $data, array $search): bool
@@ -132,6 +137,7 @@ final class CSVWriter extends Writer
      * Orders the data based on the header.
      *
      * @param  array<string>  $data The data to be ordered.
+     *
      * @return array<string> The ordered data.
      */
     public function orderData(array $data): array
@@ -146,9 +152,41 @@ final class CSVWriter extends Writer
 
     /**
      * Destructor method for the class.
+     *
+     * closes the file
      */
     public function __destruct()
     {
         fclose($this->file);
+    }
+
+    /**
+     * Returns the filename.
+     *
+     * @return string The filename.
+     */
+    public function filename(): string
+    {
+        return $this->filename;
+    }
+
+    /**
+     * Gets the headers array of the file.
+     *
+     * @return array<string> The header array.
+     */
+    public function header(): array
+    {
+        return $this->header;
+    }
+
+    /**
+     * Gets the separator used.
+     *
+     * @return string The separator.
+     */
+    public function separator(): string
+    {
+        return $this->separator;
     }
 }

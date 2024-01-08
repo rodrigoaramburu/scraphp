@@ -8,7 +8,7 @@ use ScraPHP\Writers\CSVWriter;
 beforeEach(function () {
     $this->logger = Mockery::mock(LoggerInterface::class);
     $this->writer = new CSVWriter(__DIR__.'/../assets/test.csv', ['name', 'lastname', 'age']);
-    $this->writer->withLogger($this->logger);
+
 });
 
 afterEach(function () {
@@ -18,7 +18,6 @@ afterEach(function () {
 });
 
 test('write csv line', function () {
-    $this->logger->shouldReceive('info')->once();
 
     $this->writer->write([
         'name' => 'Rodrigo',
@@ -33,7 +32,6 @@ test('write csv line', function () {
 });
 
 test('write csv line with unsorted keys ', function () {
-    $this->logger->shouldReceive('info')->once();
     $this->writer->write([
         'lastname' => 'Aramburu',
         'age' => 25,
@@ -47,8 +45,6 @@ test('write csv line with unsorted keys ', function () {
 });
 
 test('check if a value exists in the csv file', function () {
-
-    $this->logger->shouldReceive('info')->times(3);
 
     $this->writer->write([
         'name' => 'Rodrigo',
@@ -73,8 +69,6 @@ test('check if a value exists in the csv file', function () {
 });
 
 test('check if a value exists in the csv file with two criteria', function () {
-
-    $this->logger->shouldReceive('info')->times(3);
 
     $this->writer->write([
         'name' => 'Rodrigo',
@@ -102,9 +96,7 @@ test('add content to a existing cvs', function () {
 
     $this->logger = Mockery::mock(LoggerInterface::class);
     $this->writer = new CSVWriter(__DIR__.'/../assets/test.csv', ['name', 'lastname', 'age']);
-    $this->writer->withLogger($this->logger);
 
-    $this->logger->shouldReceive('info')->once();
     $this->writer->write([
         'name' => 'Antonio',
         'lastname' => 'Silva',
@@ -125,13 +117,10 @@ test('throw exception if file alread exits with different header', function () {
 
 })->throws(Exception::class, 'File '.__DIR__.'/../assets/test.csv'.' already exists with different header');
 
-
 test('write a recorde without a header', function () {
     unlink(__DIR__.'/../assets/test.csv');
 
-    $this->logger->shouldReceive('info')->once();
-    $writer = new CSVWriter(__DIR__.'/../assets/test.csv', );
-    $writer->withLogger($this->logger);
+    $writer = new CSVWriter(__DIR__.'/../assets/test.csv');
 
     $writer->write([
         'name' => 'Rodrigo',
@@ -143,15 +132,13 @@ test('write a recorde without a header', function () {
 
 });
 
-
 test('ignore blank lines in exists method', function () {
-
 
     $fp = fopen(__DIR__.'/../assets/test.csv', 'a');
     fwrite($fp, "\n");
     fwrite($fp, "Antonio,Silva,53\n");
     fwrite($fp, "\n");
-    fwrite($fp, "Gisele,Antunes,15");
+    fwrite($fp, 'Gisele,Antunes,15');
 
     expect($this->writer->exists(['name' => 'Antonio']))->toBeTrue();
     expect($this->writer->exists(['name' => 'Gisele']))->toBeTrue();

@@ -4,33 +4,20 @@ declare(strict_types=1);
 
 namespace ScraPHP\Writers;
 
-use Psr\Log\LoggerInterface;
-
-abstract class Writer
+interface Writer
 {
-    private LoggerInterface $logger;
-
-    abstract public function write(array $data): void;
-
-    abstract public function exists(array $search): bool;
+    /**
+     * Writes data.
+     *
+     * @param  array<string, mixed>  $data The data to be written.
+     */
+    public function write(array $data): void;
 
     /**
-     * Sets the logger for the class.
+     * Checks if the given search criteria exists.
      *
-     * @param  LoggerInterface  $logger The logger to be set.
+     * @param  array<string, mixed>  $search The search criteria to check.
+     * @return bool Returns true if the search criteria exists, false otherwise.
      */
-    public function withLogger(LoggerInterface $logger): void
-    {
-        $this->logger = $logger;
-    }
-
-    /**
-     * Gets the logger instance.
-     *
-     * @return LoggerInterface The logger instance.
-     */
-    public function logger(): LoggerInterface
-    {
-        return $this->logger;
-    }
+    public function exists(array $search): bool;
 }

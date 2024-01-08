@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-use ScraPHP\Page;
-use ScraPHP\ScraPHP;
-use ScraPHP\ProcessPage;
+use Psr\Log\LoggerInterface;
 use ScraPHP\HttpClient\HttpClient;
+use ScraPHP\HttpClient\Page;
+use ScraPHP\ProcessPage;
+use ScraPHP\ScraPHP;
+use ScraPHP\Writers\Writer;
 
 test('bind scraphp methods to instance', function () {
 
@@ -15,27 +17,28 @@ test('bind scraphp methods to instance', function () {
         }
     };
 
-    $scraphp = new ScraPHP();
     $httpClient = Mockery::mock(HttpClient::class);
-    $httpClient->shouldReceive('withLogger')->once();
+    $logger = Mockery::mock(LoggerInterface::class);
+    $scraphp = new ScraPHP(
+        httpClient: $httpClient,
+        logger: $logger,
+        writer: Mockery::mock(Writer::class),
+    );
+
+    $page = Mockery::mock(Page::class);
+    $page
+        ->shouldReceive('statusCode')
+        ->andReturn(200);
+
     $httpClient->shouldReceive('get')
         ->with('http://localhost:8000/hello-world.php')
         ->once()
-        ->andReturn(new Page(
-            url: 'http://localhost:8000/hello-world.php',
-            content: 'hello world',
-            statusCode: 200,
-            headers: [],
-            httpClient: $httpClient
-        ));
-    $scraphp->withHttpClient($httpClient);
+        ->andReturn($page);
 
     $pp->withScraPHP($scraphp);
 
     $pp->go('http://localhost:8000/hello-world.php', function (Page $page) {
 
     });
-
-
 
 });

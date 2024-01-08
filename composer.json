@@ -7,7 +7,8 @@
         "guzzlehttp/guzzle": "^7.8",
         "symfony/dom-crawler": "^6.3",
         "symfony/css-selector": "^6.3",
-        "monolog/monolog": "^3.5"
+        "monolog/monolog": "^3.5",
+        "php-webdriver/webdriver": "^1.15"
     },
     "require-dev": {
         "pestphp/pest": "^2.24",
@@ -29,5 +30,11 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "lint": ["pint --preset=psr12"],
+        "test": ["pest"],
+        "test:lint": ["pint --preset=psr12 --test"],
+        "test:stan": ["phpstan analyse -l 6 src"]
     }
 }
