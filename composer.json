@@ -2,6 +2,7 @@
     "name": "rodrigoaramburu/scraphp",
     "description": "Biblioteca para raspagem de dados na web",
     "license": "MIT",
+    "version": "0.2.0",
     "type": "library",
     "require": {
         "guzzlehttp/guzzle": "^7.8",
