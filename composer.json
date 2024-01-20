@@ -2,7 +2,11 @@
     "name": "rodrigoaramburu/scraphp",
     "description": "Biblioteca para raspagem de dados na web",
     "license": "MIT",
+    "version": "0.2.0",
     "type": "library",
+    "keywords": ["scrape"],
+    "prefer-stable": true,
+    "minimum-stability": "dev",
     "require": {
         "guzzlehttp/guzzle": "^7.8",
         "symfony/dom-crawler": "^6.3",
