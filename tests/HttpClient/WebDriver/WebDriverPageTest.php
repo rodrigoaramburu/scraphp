@@ -362,3 +362,18 @@ test('check if an element is displayed', function () {
     expect($page->filterCSS('.no-display-2')->isDisplayed())->toBeFalse();
     expect($page->filterCSS('.no-display-3')->isDisplayed())->toBeFalse();
 });
+
+
+test('get a text by regex', function () {
+
+    $this->webDriver->get('http://localhost:8000/regex-test.html');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    $year = $page->filterCSS('h1')->regex('/\d{4}/');
+
+    expect($year)->toBe('2024');
+});

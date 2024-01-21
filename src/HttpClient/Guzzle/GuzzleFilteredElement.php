@@ -120,4 +120,16 @@ final class GuzzleFilteredElement implements FilteredElement
             height: intval($this->crawler->attr('height')),
         );
     }
+
+    /**
+     * Executes a regex match on the text and returns the first match or null.
+     *
+     * @param string $regex The regular expression to match
+     * @return string|null The first match or null if no match
+     */
+    public function regex(string $regex): ?string
+    {
+        preg_match($regex, $this->text(), $matches);
+        return $matches[0] ?? null;
+    }
 }

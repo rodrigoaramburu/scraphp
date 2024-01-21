@@ -255,3 +255,17 @@ test('throw exception if image is invalid', function () {
     $link = $page->filterCSS('#not-image')->image();
 
 })->throws(InvalidImageException::class);
+
+test('get a text by regex', function () {
+
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/regex-test.html',
+        content: file_get_contents(__DIR__.'/../../test-pages/regex-test.html'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    $year = $page->filterCSS('h1')->regex('/\d{4}/');
+
+    expect($year)->toBe('2024');
+});
