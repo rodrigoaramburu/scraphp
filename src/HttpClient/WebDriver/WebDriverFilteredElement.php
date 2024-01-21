@@ -137,4 +137,16 @@ final class WebDriverFilteredElement implements FilteredElement
             height: intval($this->remoteWebElement->getAttribute('height')),
         );
     }
+
+
+    /**
+     * Check if the element is displayed.
+     *
+     * @return bool Whether the element is displayed or not.
+     */
+    public function isDisplayed(): bool
+    {
+        return $this->remoteWebElement
+            ->isDisplayed();
+    }
 }
