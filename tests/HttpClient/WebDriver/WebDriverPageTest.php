@@ -310,3 +310,70 @@ test('throw exception if image is invalid', function () {
     $link = $page->filterCSS('#not-image')->image();
 
 })->throws(InvalidImageException::class);
+
+
+test('click on a button and execute a js action', function () {
+
+    $this->webDriver->get('http://localhost:8000/click-page-teste.html');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    $page->click('#button');
+    sleep(2);
+
+    $result = $page->filterCSS('#saida')->text();
+
+    expect($result)->toBe('Clicked!');
+
+});
+
+test('scroll to the end of the padge', function () {
+
+    $this->webDriver->get('http://localhost:8000/scroll-test.html');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    $page->scrollToEnd();
+    sleep(5);
+
+    $result = $this->webDriver->executeScript('return window.pageYOffset;');
+
+    expect($result)->toBeGreaterThan(24000);
+
+});
+
+
+test('check if an element is displayed', function () {
+    $this->webDriver->get('http://localhost:8000/no-display-test.html');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    expect($page->filterCSS('.present')->isDisplayed())->toBeTrue();
+    expect($page->filterCSS('.no-display-1')->isDisplayed())->toBeFalse();
+    expect($page->filterCSS('.no-display-2')->isDisplayed())->toBeFalse();
+    expect($page->filterCSS('.no-display-3')->isDisplayed())->toBeFalse();
+});
+
+
+test('get a text by regex', function () {
+
+    $this->webDriver->get('http://localhost:8000/regex-test.html');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    $year = $page->filterCSS('h1')->regex('/\d{4}/');
+
+    expect($year)->toBe('2024');
+});

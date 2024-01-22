@@ -139,6 +139,28 @@ final class WebDriverPage implements Page
 
 
     /**
+     * Click on an element by javascript.
+     *
+     * @param string $cssSelector The CSS selector of the element to click on.
+     */
+    public function click(string $cssSelector): void
+    {
+        $this->webDriver
+            ->executeScript("document.querySelector('$cssSelector').click();");
+    }
+
+    /**
+     * Scrolls to the end of the page.
+     *
+     * @return void
+     */
+    public function scrollToEnd(): void
+    {
+        $this->webDriver
+            ->executeScript('window.scrollTo(0,document.body.scrollHeight);');
+    }
+
+    /**
      * Get the web driver.
      *
      * @return RemoteWebDriver The web driver.

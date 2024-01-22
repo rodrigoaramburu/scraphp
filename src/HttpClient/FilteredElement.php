@@ -65,4 +65,13 @@ interface FilteredElement
      * @throws InvalidImageException If unable to get the image.
      */
     public function image(): Image;
+
+
+    /**
+     * Executes a regex match on the text and returns the first match or null.
+     *
+     * @param string $regex The regular expression to match
+     * @return string|null The first match or null if no match
+     */
+    public function regex(string $regex): ?string;
 }
