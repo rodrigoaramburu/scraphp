@@ -125,11 +125,15 @@ final class GuzzleFilteredElement implements FilteredElement
      * Executes a regex match on the text and returns the first match or null.
      *
      * @param string $regex The regular expression to match
+     * @param string|null $groupName The name of the capture group to return
      * @return string|null The first match or null if no match
      */
-    public function regex(string $regex): ?string
+    public function regex(string $regex, ?string $groupName = null): ?string
     {
         preg_match($regex, $this->text(), $matches);
+        if($groupName !== null) {
+            return $matches[$groupName] ?? null;
+        }
         return $matches[0] ?? null;
     }
 }

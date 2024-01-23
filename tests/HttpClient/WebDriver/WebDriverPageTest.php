@@ -377,3 +377,18 @@ test('get a text by regex', function () {
 
     expect($year)->toBe('2024');
 });
+
+
+test('get a text by regex with group', function () {
+
+    $this->webDriver->get('http://localhost:8000/regex-test.html');
+    $page = new WebDriverPage(
+        statusCode: 200,
+        headers: [],
+        webDriver: $this->webDriver,
+    );
+
+    $year = $page->filterCSS('p')->regex('/The year: (?<year>\d{4})/', 'year');
+
+    expect($year)->toBe('2024');
+});
