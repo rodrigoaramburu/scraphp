@@ -2,7 +2,7 @@
     "name": "rodrigoaramburu/scraphp",
     "description": "Biblioteca para raspagem de dados na web",
     "license": "MIT",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "type": "library",
     "keywords": ["scrape"],
     "prefer-stable": true,
