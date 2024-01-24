@@ -269,3 +269,18 @@ test('get a text by regex', function () {
 
     expect($year)->toBe('2024');
 });
+
+
+test('get a text by regex with group', function () {
+
+    $page = new GuzzlePage(
+        url: 'http://localhost:8000/regex-test.html',
+        content: file_get_contents(__DIR__.'/../../test-pages/regex-test.html'),
+        statusCode: 200,
+        headers: [],
+    );
+
+    $year = $page->filterCSS('p')->regex('/The year: (?<year>\d{4})/', 'year');
+
+    expect($year)->toBe('2024');
+});
